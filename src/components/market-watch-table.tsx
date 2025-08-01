@@ -16,6 +16,7 @@ import {
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 type MarketData = {
   state: string;
@@ -65,6 +66,12 @@ interface MarketWatchTableProps {
   data: MarketData[];
 }
 
+const indianStates = [
+  "Andhra Pradesh", "Arunachal Pradesh", "Assam", "Bihar", "Chhattisgarh", "Goa", "Gujarat", "Haryana", "Himachal Pradesh",
+  "Jharkhand", "Karnataka", "Kerala", "Madhya Pradesh", "Maharashtra", "Manipur", "Meghalaya", "Mizoram", "Nagaland",
+  "Odisha", "Punjab", "Rajasthan", "Sikkim", "Tamil Nadu", "Telangana", "Tripura", "Uttar Pradesh", "Uttarakhand", "West Bengal", "National Capital Territory of Delhi"
+];
+
 export function MarketWatchTable({ data }: MarketWatchTableProps) {
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
@@ -82,17 +89,38 @@ export function MarketWatchTable({ data }: MarketWatchTableProps) {
       sorting,
       columnFilters,
     },
+    initialState: {
+      pagination: {
+        pageSize: 50,
+      }
+    }
   });
 
   return (
     <div>
-      <div className="flex items-center py-4">
+      <div className="flex items-center gap-4 py-4">
         <Input
           placeholder="Filter commodities..."
           value={(table.getColumn('commodity')?.getFilterValue() as string) ?? ''}
           onChange={(event) => table.getColumn('commodity')?.setFilterValue(event.target.value)}
-          className="max-w-sm"
+          className="max-w-xs"
         />
+        <Select
+          value={(table.getColumn('state')?.getFilterValue() as string) ?? ''}
+          onValueChange={(value) => table.getColumn('state')?.setFilterValue(value === 'all' ? '' : value)}
+        >
+          <SelectTrigger className="max-w-xs w-full">
+            <SelectValue placeholder="Filter by state..." />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All States</SelectItem>
+            {indianStates.map((state) => (
+              <SelectItem key={state} value={state}>
+                {state}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
       <div className="rounded-md border">
         <Table>
