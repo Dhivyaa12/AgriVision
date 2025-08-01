@@ -2,7 +2,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import {
-  BotMessageSquare,
+  Leaf,
   Sprout,
   ScanSearch,
   Landmark,
@@ -34,7 +34,7 @@ import { UserNav } from '@/components/user-nav';
 import { Separator } from '@/components/ui/separator';
 
 export const metadata: Metadata = {
-  title: 'AgriVision',
+  title: 'AgriAssist',
   description: 'An AI-Powered Agricultural Assistant to help farmers.',
 };
 
@@ -61,8 +61,8 @@ export default function RootLayout({
             <Sidebar>
               <SidebarHeader>
                 <div className="flex items-center gap-2">
-                  <BotMessageSquare className="size-8 text-primary" />
-                  <h1 className="text-2xl font-headline font-bold text-primary">AgriVision</h1>
+                  <Leaf className="size-8 text-primary" />
+                  <h1 className="text-2xl font-headline font-bold text-primary">AgriAssist</h1>
                 </div>
               </SidebarHeader>
               <SidebarContent>
