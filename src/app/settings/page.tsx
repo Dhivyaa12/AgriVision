@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { ThemeToggle } from '@/components/theme-toggle';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { useLanguage } from '@/hooks/use-language';
 
 const languages = [
   { value: 'en', label: 'English' },
@@ -17,6 +18,8 @@ const languages = [
 ];
 
 export default function SettingsPage() {
+  const { language, setLanguage } = useLanguage();
+
   return (
     <div className="container mx-auto py-8 px-4 md:px-6">
       <PageHeader>
@@ -44,7 +47,7 @@ export default function SettingsPage() {
           <CardContent>
             <div className="flex items-center justify-between">
               <Label htmlFor="language-select">Language</Label>
-               <Select defaultValue="en">
+               <Select value={language} onValueChange={setLanguage}>
                 <SelectTrigger id="language-select" className="w-[180px]">
                   <SelectValue placeholder="Select language" />
                 </SelectTrigger>

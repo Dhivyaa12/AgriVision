@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import Image from 'next/image';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -15,6 +15,7 @@ import { diagnoseCrop, type DiagnoseCropOutput } from '@/ai/flows/crop-diagnosis
 import { textToSpeech } from '@/ai/flows/text-to-speech';
 import { speechToText } from '@/ai/flows/speech-to-text';
 import { cn } from '@/lib/utils';
+import { useLanguage } from '@/hooks/use-language';
 
 const formSchema = z.object({
   photo: z.any().refine((file) => file?.[0], 'Please upload an image.'),
@@ -33,6 +34,9 @@ export function CropDiagnosisForm() {
   const [recordingLoading, setRecordingLoading] = useState(false);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
+  
+  const { language } = useLanguage();
+
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -93,7 +97,7 @@ export function CropDiagnosisForm() {
         Recommended Remedies: ${result.recommendedRemedies}.
         Preventive Measures: ${result.preventiveMeasures}.
       `;
-      const response = await textToSpeech({ text: textToRead });
+      const response = await textToSpeech({ text: textToRead, language: language });
       setAudioDataUri(response.audioDataUri);
     } catch (e) {
       console.error(e);

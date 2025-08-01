@@ -15,6 +15,7 @@ import wav from 'wav';
 
 const TextToSpeechInputSchema = z.object({
   text: z.string().describe('The text to be converted to speech.'),
+  language: z.string().optional().describe('The language to use for the speech, e.g., "en", "ta".'),
 });
 export type TextToSpeechInput = z.infer<typeof TextToSpeechInputSchema>;
 
@@ -28,20 +29,32 @@ export async function textToSpeech(input: TextToSpeechInput): Promise<TextToSpee
   return textToSpeechFlow(input);
 }
 
+const getVoiceForLanguage = (language?: string) => {
+    switch (language) {
+      case 'ta':
+        return 'Arcturus'; 
+      case 'en':
+      default:
+        return 'Algenib';
+    }
+}
+
 const textToSpeechFlow = ai.defineFlow(
   {
     name: 'textToSpeechFlow',
     inputSchema: TextToSpeechInputSchema,
     outputSchema: TextToSpeechOutputSchema,
   },
-  async ({ text }) => {
+  async ({ text, language }) => {
+    const voiceName = getVoiceForLanguage(language);
+
     const { media } = await ai.generate({
       model: googleAI.model('gemini-2.5-flash-preview-tts'),
       config: {
         responseModalities: ['AUDIO'],
         speechConfig: {
           voiceConfig: {
-            prebuiltVoiceConfig: { voiceName: 'Algenib' }, // Default voice
+            prebuiltVoiceConfig: { voiceName },
           },
         },
       },
