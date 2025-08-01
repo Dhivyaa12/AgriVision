@@ -1,3 +1,4 @@
+
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import {
@@ -118,10 +119,12 @@ export default function RootLayout({
                     </SidebarMenuButton>
                   </SidebarMenuItem>
                   <SidebarMenuItem>
-                    <SidebarMenuButton>
-                      <Settings />
-                      <span>Settings</span>
-                    </SidebarMenuButton>
+                    <Link href="/settings" passHref>
+                      <SidebarMenuButton>
+                        <Settings />
+                        <span>Settings</span>
+                      </SidebarMenuButton>
+                    </Link>
                   </SidebarMenuItem>
                 </SidebarMenu>
               </SidebarFooter>
