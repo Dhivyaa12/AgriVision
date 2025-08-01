@@ -1,0 +1,196 @@
+'use client';
+
+import { useState } from 'react';
+import Image from 'next/image';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import * as z from 'zod';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Loader2, UploadCloud, Leaf, AlertTriangle, Bug, FlaskConical, ShieldCheck } from 'lucide-react';
+import { diagnoseCrop, type DiagnoseCropOutput } from '@/ai/flows/crop-diagnosis';
+
+const formSchema = z.object({
+  photo: z.any().refine((file) => file?.[0], 'Please upload an image.'),
+  description: z.string().min(10, 'Please provide a detailed description.'),
+});
+
+export function CropDiagnosisForm() {
+  const [result, setResult] = useState<DiagnoseCropOutput | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [preview, setPreview] = useState<string | null>(null);
+
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      description: '',
+    },
+  });
+
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setPreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const onSubmit = async (values: z.infer<typeof formSchema>) => {
+    setLoading(true);
+    setResult(null);
+    setError(null);
+
+    try {
+      const file = values.photo[0];
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = async () => {
+        const photoDataUri = reader.result as string;
+        const response = await diagnoseCrop({
+          photoDataUri,
+          description: values.description,
+        });
+        setResult(response);
+      };
+      reader.onerror = (error) => {
+        console.error('Error reading file:', error);
+        setError('Failed to read the image file.');
+      };
+    } catch (e) {
+      console.error(e);
+      setError('An error occurred during diagnosis.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+      <Card>
+        <CardHeader>
+          <CardTitle className="font-headline">Submit for Diagnosis</CardTitle>
+          <CardDescription>Upload an image and describe the issue.</CardDescription>
+        </CardHeader>
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)}>
+            <CardContent className="space-y-4">
+              <FormField
+                control={form.control}
+                name="photo"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Crop Photo</FormLabel>
+                    <FormControl>
+                      <div className="flex items-center justify-center w-full">
+                        <label htmlFor="dropzone-file" className="flex flex-col items-center justify-center w-full h-64 border-2 border-dashed rounded-lg cursor-pointer bg-card hover:bg-muted/50">
+                          {preview ? (
+                            <Image src={preview} alt="Preview" width={256} height={256} className="object-contain h-full w-full rounded-lg" />
+                          ) : (
+                            <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                              <UploadCloud className="w-8 h-8 mb-4 text-muted-foreground" />
+                              <p className="mb-2 text-sm text-muted-foreground"><span className="font-semibold">Click to upload</span> or drag and drop</p>
+                              <p className="text-xs text-muted-foreground">PNG, JPG or JPEG</p>
+                            </div>
+                          )}
+                          <Input id="dropzone-file" type="file" className="hidden" accept="image/png, image/jpeg, image/jpg" 
+                            onChange={(e) => {
+                              field.onChange(e.target.files);
+                              handleFileChange(e);
+                            }}
+                          />
+                        </label>
+                      </div>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="description"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Description of Symptoms</FormLabel>
+                    <FormControl>
+                      <Textarea placeholder="e.g., Yellow spots on leaves, wilting stems, etc." {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </CardContent>
+            <CardFooter>
+              <Button type="submit" disabled={loading} className="w-full">
+                {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                Diagnose
+              </Button>
+            </CardFooter>
+          </form>
+        </Form>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="font-headline">Diagnosis Result</CardTitle>
+          <CardDescription>AI-powered analysis and recommendations.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          {loading && (
+            <div className="flex justify-center items-center h-full">
+              <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            </div>
+          )}
+          {error && <p className="text-destructive">{error}</p>}
+          {result && (
+            <div className="space-y-6">
+              <div className="flex items-center gap-4">
+                <div className="p-3 bg-primary/10 rounded-full">
+                  <Leaf className="h-6 w-6 text-primary" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold">{result.diseaseName}</h3>
+                  <p className="text-sm text-muted-foreground">Identified Disease</p>
+                </div>
+              </div>
+              <div className="space-y-4">
+                <div className="flex gap-4">
+                  <Bug className="h-5 w-5 mt-1 text-accent flex-shrink-0" />
+                  <div>
+                    <h4 className="font-semibold">Possible Causes</h4>
+                    <p className="text-muted-foreground">{result.possibleCauses}</p>
+                  </div>
+                </div>
+                <div className="flex gap-4">
+                  <FlaskConical className="h-5 w-5 mt-1 text-accent flex-shrink-0" />
+                  <div>
+                    <h4 className="font-semibold">Recommended Remedies</h4>
+                    <p className="text-muted-foreground">{result.recommendedRemedies}</p>
+                  </div>
+                </div>
+                <div className="flex gap-4">
+                  <ShieldCheck className="h-5 w-5 mt-1 text-accent flex-shrink-0" />
+                  <div>
+                    <h4 className="font-semibold">Preventive Measures</h4>
+                    <p className="text-muted-foreground">{result.preventiveMeasures}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+          {!loading && !result && !error && (
+            <div className="text-center text-muted-foreground py-10">
+              Your diagnosis results will appear here.
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
