@@ -5,6 +5,16 @@ import { PageHeader, PageHeaderHeading, PageHeaderDescription } from '@/componen
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { ThemeToggle } from '@/components/theme-toggle';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+
+const languages = [
+  { value: 'en', label: 'English' },
+  { value: 'ta', label: 'Tamil' },
+  { value: 'hi', label: 'Hindi' },
+  { value: 'ml', label: 'Malayalam' },
+  { value: 'te', label: 'Telugu' },
+  { value: 'kn', label: 'Kannada' },
+];
 
 export default function SettingsPage() {
   return (
@@ -15,8 +25,8 @@ export default function SettingsPage() {
           Manage your application settings and preferences.
         </PageHeaderDescription>
       </PageHeader>
-      <div className="mt-8">
-        <Card className="max-w-md">
+      <div className="mt-8 grid gap-6 max-w-md">
+        <Card>
           <CardHeader>
             <CardTitle>Appearance</CardTitle>
           </CardHeader>
@@ -24,6 +34,28 @@ export default function SettingsPage() {
             <div className="flex items-center justify-between">
               <Label htmlFor="theme-toggle">Theme</Label>
               <ThemeToggle />
+            </div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle>Language</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex items-center justify-between">
+              <Label htmlFor="language-select">Language</Label>
+               <Select defaultValue="en">
+                <SelectTrigger id="language-select" className="w-[180px]">
+                  <SelectValue placeholder="Select language" />
+                </SelectTrigger>
+                <SelectContent>
+                  {languages.map((lang) => (
+                    <SelectItem key={lang.value} value={lang.value}>
+                      {lang.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
           </CardContent>
         </Card>
