@@ -13,6 +13,7 @@ import {ai} from '@/ai/genkit';
 import {googleAI} from '@genkit-ai/googleai';
 import {z} from 'genkit';
 import wav from 'wav';
+import { translateText } from './translate-text';
 
 const TextToSpeechInputSchema = z.object({
   text: z.string().describe('The text to be converted to speech.'),
@@ -56,6 +57,13 @@ const textToSpeechFlow = ai.defineFlow(
   },
   async ({ text, language }) => {
     const voiceName = getVoiceForLanguage(language);
+    
+    let textToSpeak = text;
+    if (language && language !== 'en') {
+      const translationResponse = await translateText({ text, targetLanguage: language });
+      textToSpeak = translationResponse.translatedText;
+    }
+
 
     const { media } = await ai.generate({
       model: googleAI.model('gemini-2.5-flash-preview-tts'),
@@ -67,7 +75,7 @@ const textToSpeechFlow = ai.defineFlow(
           },
         },
       },
-      prompt: text,
+      prompt: textToSpeak,
     });
     
     if (!media) {
