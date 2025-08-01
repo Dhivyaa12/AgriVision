@@ -125,7 +125,7 @@ export function CropDiagnosisForm() {
           const audioDataUri = reader.result as string;
           try {
             const { text } = await speechToText({ audioDataUri });
-            form.setValue('description', form.getValues('description') + text);
+            form.setValue('description', text);
           } catch (e) {
             console.error(e);
             setError('Failed to transcribe audio.');
