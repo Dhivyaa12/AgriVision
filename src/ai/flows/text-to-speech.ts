@@ -32,7 +32,7 @@ export async function textToSpeech(input: TextToSpeechInput): Promise<TextToSpee
 const getVoiceForLanguage = (language?: string) => {
     switch (language) {
       case 'ta':
-        return 'Arcturus'; 
+        return 'Achernar'; 
       case 'en':
       default:
         return 'Algenib';
