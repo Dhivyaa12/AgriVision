@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState } from 'react';
@@ -12,6 +13,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Loader2, Sprout, CheckCircle, Wind, MapPin, Cloudy } from 'lucide-react';
 import { recommendBestCrops, type CropRecommendationOutput } from '@/ai/flows/crop-recommendation';
 import { Separator } from '../ui/separator';
+import { useTranslation } from '@/hooks/use-translation';
+
 
 const formSchema = z.object({
   soilNature: z.string().min(1, 'Please select a soil type.'),
@@ -25,10 +28,28 @@ const indianStates = [
   "Odisha", "Punjab", "Rajasthan", "Sikkim", "Tamil Nadu", "Telangana", "Tripura", "Uttar Pradesh", "Uttarakhand", "West Bengal"
 ];
 
+const texts = {
+    formTitle: "Get Crop Recommendations",
+    formDescription: "Fill in the details below to get AI-powered crop suggestions.",
+    soilLabel: "Soil Nature",
+    soilPlaceholder: "Select soil type",
+    weatherLabel: "Current Weather",
+    weatherPlaceholder: "e.g., Sunny, 28°C",
+    stateLabel: "State",
+    statePlaceholder: "Select your state",
+    recommendButton: "Recommend Crops",
+    resultTitle: "AI Recommendations",
+    resultDescription: "Crops best suited for your conditions.",
+    recommendedCrops: "Recommended Crops:",
+    resultsPlaceholder: "Your crop recommendations will appear here."
+};
+
 export function CropRecommendationForm() {
   const [result, setResult] = useState<CropRecommendationOutput | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const { t } = useTranslation(texts);
+
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -57,8 +78,8 @@ export function CropRecommendationForm() {
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
       <Card>
         <CardHeader>
-          <CardTitle className="font-headline">Get Crop Recommendations</CardTitle>
-          <CardDescription>Fill in the details below to get AI-powered crop suggestions.</CardDescription>
+          <CardTitle className="font-headline">{t('formTitle')}</CardTitle>
+          <CardDescription>{t('formDescription')}</CardDescription>
         </CardHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)}>
@@ -68,10 +89,10 @@ export function CropRecommendationForm() {
                 name="soilNature"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Soil Nature</FormLabel>
+                    <FormLabel>{t('soilLabel')}</FormLabel>
                     <Select onValueChange={field.onChange} defaultValue={field.value}>
                       <FormControl>
-                        <SelectTrigger><SelectValue placeholder="Select soil type" /></SelectTrigger>
+                        <SelectTrigger><SelectValue placeholder={t('soilPlaceholder')} /></SelectTrigger>
                       </FormControl>
                       <SelectContent>
                         <SelectItem value="sandy">Sandy</SelectItem>
@@ -90,9 +111,9 @@ export function CropRecommendationForm() {
                 name="weatherConditions"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Current Weather</FormLabel>
+                    <FormLabel>{t('weatherLabel')}</FormLabel>
                     <FormControl>
-                      <Input placeholder="e.g., Sunny, 28°C" {...field} />
+                      <Input placeholder={t('weatherPlaceholder')} {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -103,10 +124,10 @@ export function CropRecommendationForm() {
                 name="state"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>State</FormLabel>
+                    <FormLabel>{t('stateLabel')}</FormLabel>
                      <Select onValueChange={field.onChange} defaultValue={field.value}>
                       <FormControl>
-                        <SelectTrigger><SelectValue placeholder="Select your state" /></SelectTrigger>
+                        <SelectTrigger><SelectValue placeholder={t('statePlaceholder')} /></SelectTrigger>
                       </FormControl>
                       <SelectContent>
                         {indianStates.map(state => <SelectItem key={state} value={state}>{state}</SelectItem>)}
@@ -120,7 +141,7 @@ export function CropRecommendationForm() {
             <CardFooter>
               <Button type="submit" disabled={loading} className="w-full">
                 {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                Recommend Crops
+                {t('recommendButton')}
               </Button>
             </CardFooter>
           </form>
@@ -129,8 +150,8 @@ export function CropRecommendationForm() {
       
       <Card>
         <CardHeader>
-          <CardTitle className="font-headline">AI Recommendations</CardTitle>
-          <CardDescription>Crops best suited for your conditions.</CardDescription>
+          <CardTitle className="font-headline">{t('resultTitle')}</CardTitle>
+          <CardDescription>{t('resultDescription')}</CardDescription>
         </CardHeader>
         <CardContent>
           {loading && (
@@ -141,7 +162,7 @@ export function CropRecommendationForm() {
           {error && <p className="text-destructive">{error}</p>}
           {result && (
             <div className="space-y-4">
-              <h3 className="font-semibold text-lg">Recommended Crops:</h3>
+              <h3 className="font-semibold text-lg">{t('recommendedCrops')}</h3>
               <ul className="space-y-3">
                 {result.recommendedCrops.map((crop, index) => (
                   <li key={index} className="pb-3 border-b border-border/50 last:border-b-0">
@@ -164,7 +185,7 @@ export function CropRecommendationForm() {
           )}
           {!loading && !result && !error && (
             <div className="text-center text-muted-foreground py-10">
-              Your crop recommendations will appear here.
+              {t('resultsPlaceholder')}
             </div>
           )}
         </CardContent>

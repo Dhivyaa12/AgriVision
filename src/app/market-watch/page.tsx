@@ -1,8 +1,11 @@
+
 'use client';
 import { useEffect, useState } from 'react';
 import { PageHeader, PageHeaderHeading, PageHeaderDescription } from '@/components/page-header';
 import { MarketWatchTable } from '@/components/market-watch-table';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useTranslation } from '@/hooks/use-translation';
+
 
 export type MarketData = {
   state: string;
@@ -16,10 +19,17 @@ export type MarketData = {
   modal_price: string;
 };
 
+const texts = {
+  title: "Market Watch",
+  description: "Daily Mandi prices for vegetables, grains, and other crops across various markets.",
+};
+
+
 export default function MarketWatchPage() {
   const [data, setData] = useState<MarketData[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const { t } = useTranslation(texts);
 
   useEffect(() => {
     async function fetchData() {
@@ -51,9 +61,9 @@ export default function MarketWatchPage() {
   return (
     <div className="container mx-auto py-8 px-4 md:px-6">
       <PageHeader>
-        <PageHeaderHeading className="font-headline">Market Watch</PageHeaderHeading>
+        <PageHeaderHeading className="font-headline">{t('title')}</PageHeaderHeading>
         <PageHeaderDescription>
-          Daily Mandi prices for vegetables, grains, and other crops across various markets.
+          {t('description')}
         </PageHeaderDescription>
       </PageHeader>
       <div className="mt-8">

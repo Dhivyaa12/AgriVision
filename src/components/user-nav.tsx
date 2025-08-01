@@ -1,5 +1,5 @@
 
-"use client"
+'use client';
 import Link from "next/link"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
@@ -15,8 +15,17 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { ThemeToggle } from "./theme-toggle"
 import { Settings, LogOut, User } from "lucide-react"
+import { useTranslation } from "@/hooks/use-translation";
+
+const texts = {
+    profile: "Profile",
+    settings: "Settings",
+    theme: "Theme",
+    logout: "Log out",
+};
 
 export function UserNav() {
+  const { t } = useTranslation(texts);
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -41,25 +50,25 @@ export function UserNav() {
           <Link href="/profile" passHref>
             <DropdownMenuItem>
               <User className="mr-2 h-4 w-4" />
-              <span>Profile</span>
+              <span>{t('profile')}</span>
             </DropdownMenuItem>
           </Link>
           <Link href="/settings" passHref>
             <DropdownMenuItem>
               <Settings className="mr-2 h-4 w-4" />
-              <span>Settings</span>
+              <span>{t('settings')}</span>
             </DropdownMenuItem>
           </Link>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
         <DropdownMenuItem className="flex justify-between">
-          Theme
+          {t('theme')}
           <ThemeToggle />
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem>
           <LogOut className="mr-2 h-4 w-4" />
-          <span>Log out</span>
+          <span>{t('logout')}</span>
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

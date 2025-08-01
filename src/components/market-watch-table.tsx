@@ -1,3 +1,4 @@
+
 'use client';
 
 import * as React from 'react';
@@ -17,6 +18,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { useTranslation } from '@/hooks/use-translation';
+
 
 type MarketData = {
   state: string;
@@ -30,51 +33,58 @@ type MarketData = {
   modal_price: string;
 };
 
-export const columns: ColumnDef<MarketData>[] = [
-  {
-    accessorKey: 'commodity',
-    header: 'Commodity',
-  },
-  {
-    accessorKey: 'variety',
-    header: 'Variety',
-  },
-  {
-    accessorKey: 'market',
-    header: 'Market',
-  },
-  {
-    accessorKey: 'district',
-    header: 'District',
-  },
-  {
-    accessorKey: 'state',
-    header: 'State',
-  },
-  {
-    accessorKey: 'modal_price',
-    header: 'Modal Price (₹)',
-    cell: ({ row }) => {
-      const amount = parseFloat(row.getValue('modal_price'));
-      const formatted = new Intl.NumberFormat('en-IN').format(amount);
-      return <div className="text-right font-medium">{formatted}</div>;
-    },
-  },
-];
-
-interface MarketWatchTableProps {
-  data: MarketData[];
-}
-
-const indianStates = [
-  "Andhra Pradesh", "Arunachal Pradesh", "Assam", "Bihar", "Chhattisgarh", "Goa", "Gujarat", "Haryana", "Himachal Pradesh",
-  "Jharkhand", "Karnataka", "Kerala", "Madhya Pradesh", "Maharashtra", "Manipur", "Meghalaya", "Mizoram", "Nagaland",
-  "Odisha", "Punjab", "Rajasthan", "Sikkim", "Tamil Nadu", "Telangana", "Tripura", "Uttar Pradesh", "Uttarakhand", "West Bengal", "National Capital Territory of Delhi"
-];
+const texts = {
+    filterCommodities: "Filter commodities...",
+    filterState: "Filter by state...",
+    allStates: "All States",
+    noResults: "No results.",
+    previous: "Previous",
+    next: "Next",
+    commodity: "Commodity",
+    variety: "Variety",
+    market: "Market",
+    district: "District",
+    state: "State",
+    modalPrice: "Modal Price (₹)"
+};
 
 export function MarketWatchTable({ data }: MarketWatchTableProps) {
+  const { t, currentLanguage } = useTranslation(texts);
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
+
+  const columns: ColumnDef<MarketData>[] = React.useMemo(() => [
+    {
+      accessorKey: 'commodity',
+      header: t('commodity'),
+    },
+    {
+      accessorKey: 'variety',
+      header: t('variety'),
+    },
+    {
+      accessorKey: 'market',
+      header: t('market'),
+    },
+    {
+      accessorKey: 'district',
+      header: t('district'),
+    },
+    {
+      accessorKey: 'state',
+      header: t('state'),
+    },
+    {
+      accessorKey: 'modal_price',
+      header: () => <div className="text-right">{t('modalPrice')}</div>,
+      cell: ({ row }) => {
+        const amount = parseFloat(row.getValue('modal_price'));
+        const formatted = new Intl.NumberFormat('en-IN').format(amount);
+        return <div className="text-right font-medium">{formatted}</div>;
+      },
+    },
+  ], [t, currentLanguage]);
+
 
   const table = useReactTable({
     data,
@@ -96,11 +106,17 @@ export function MarketWatchTable({ data }: MarketWatchTableProps) {
     }
   });
 
+  const indianStates = [
+    "Andhra Pradesh", "Arunachal Pradesh", "Assam", "Bihar", "Chhattisgarh", "Goa", "Gujarat", "Haryana", "Himachal Pradesh",
+    "Jharkhand", "Karnataka", "Kerala", "Madhya Pradesh", "Maharashtra", "Manipur", "Meghalaya", "Mizoram", "Nagaland",
+    "Odisha", "Punjab", "Rajasthan", "Sikkim", "Tamil Nadu", "Telangana", "Tripura", "Uttar Pradesh", "Uttarakhand", "West Bengal", "National Capital Territory of Delhi"
+  ];
+
   return (
     <div>
       <div className="flex items-center gap-4 py-4">
         <Input
-          placeholder="Filter commodities..."
+          placeholder={t('filterCommodities')}
           value={(table.getColumn('commodity')?.getFilterValue() as string) ?? ''}
           onChange={(event) => table.getColumn('commodity')?.setFilterValue(event.target.value)}
           className="max-w-xs"
@@ -110,10 +126,10 @@ export function MarketWatchTable({ data }: MarketWatchTableProps) {
           onValueChange={(value) => table.getColumn('state')?.setFilterValue(value === 'all' ? '' : value)}
         >
           <SelectTrigger className="max-w-xs w-full">
-            <SelectValue placeholder="Filter by state..." />
+            <SelectValue placeholder={t('filterState')} />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All States</SelectItem>
+            <SelectItem value="all">{t('allStates')}</SelectItem>
             {indianStates.map((state) => (
               <SelectItem key={state} value={state}>
                 {state}
@@ -149,7 +165,7 @@ export function MarketWatchTable({ data }: MarketWatchTableProps) {
             ) : (
               <TableRow>
                 <TableCell colSpan={columns.length} className="h-24 text-center">
-                  No results.
+                  {t('noResults')}
                 </TableCell>
               </TableRow>
             )}
@@ -158,10 +174,10 @@ export function MarketWatchTable({ data }: MarketWatchTableProps) {
       </div>
       <div className="flex items-center justify-end space-x-2 py-4">
         <Button variant="outline" size="sm" onClick={() => table.previousPage()} disabled={!table.getCanPreviousPage()}>
-          Previous
+          {t('previous')}
         </Button>
         <Button variant="outline" size="sm" onClick={() => table.nextPage()} disabled={!table.getCanNextPage()}>
-          Next
+          {t('next')}
         </Button>
       </div>
     </div>

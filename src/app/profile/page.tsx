@@ -1,18 +1,32 @@
 
+'use client';
 import { PageHeader, PageHeaderHeading, PageHeaderDescription } from '@/components/page-header';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import { useTranslation } from '@/hooks/use-translation';
+
+
+const texts = {
+    title: "User Profile",
+    description: "View and manage your profile details.",
+    username: "Username",
+    email: "Email",
+    state: "State",
+    editProfile: "Edit Profile"
+};
+
 
 export default function ProfilePage() {
+    const { t } = useTranslation(texts);
   return (
     <div className="container mx-auto py-8 px-4 md:px-6">
       <PageHeader>
-        <PageHeaderHeading className="font-headline">User Profile</PageHeaderHeading>
+        <PageHeaderHeading className="font-headline">{t('title')}</PageHeaderHeading>
         <PageHeaderDescription>
-          View and manage your profile details.
+          {t('description')}
         </PageHeaderDescription>
       </PageHeader>
       <div className="mt-8">
@@ -31,18 +45,18 @@ export default function ProfilePage() {
             </CardHeader>
           <CardContent className="space-y-6">
             <div className="space-y-2">
-              <Label htmlFor="username">Username</Label>
+              <Label htmlFor="username">{t('username')}</Label>
               <Input id="username" value="farmer" readOnly />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="email">{t('email')}</Label>
               <Input id="email" type="email" value="farmer@example.com" readOnly />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="state">State</Label>
+              <Label htmlFor="state">{t('state')}</Label>
               <Input id="state" value="Maharashtra" readOnly />
             </div>
-            <Button>Edit Profile</Button>
+            <Button>{t('editProfile')}</Button>
           </CardContent>
         </Card>
       </div>

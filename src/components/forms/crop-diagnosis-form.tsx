@@ -18,6 +18,7 @@ import { speechToText } from '@/ai/flows/speech-to-text';
 import { cn } from '@/lib/utils';
 import { useLanguage } from '@/hooks/use-language';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { useTranslation } from '@/hooks/use-translation';
 
 
 const formSchema = z.object({
@@ -34,6 +35,27 @@ const languages = [
   { value: 'kn', label: 'Kannada' },
 ];
 
+const texts = {
+    submitTitle: "Submit for Diagnosis",
+    submitDescription: "Upload an image and describe the issue.",
+    cropPhoto: "Crop Photo",
+    uploadPrompt: "Click to upload",
+    uploadOrDrag: "or drag and drop",
+    fileTypes: "PNG, JPG or JPEG",
+    symptomsLabel: "Description of Symptoms",
+    symptomsPlaceholder: "e.g., Yellow spots on leaves, wilting stems, etc. You can also use the microphone to record your description.",
+    diagnoseButton: "Diagnose",
+    resultTitle: "Diagnosis Result",
+    resultDescription: "AI-powered analysis and recommendations.",
+    language: "Language",
+    listenButton: "Listen to diagnosis",
+    disease: "Identified Disease",
+    causes: "Possible Causes",
+    remedies: "Recommended Remedies",
+    prevention: "Preventive Measures",
+    resultsPlaceholder: "Your diagnosis results will appear here.",
+};
+
 export function CropDiagnosisForm() {
   const [result, setResult] = useState<DiagnoseCropOutput | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -49,6 +71,8 @@ export function CropDiagnosisForm() {
   
   const { language } = useLanguage();
   const [ttsLanguage, setTtsLanguage] = useState(language);
+  const { t } = useTranslation(texts);
+
 
   useEffect(() => {
     setTtsLanguage(language);
@@ -170,8 +194,8 @@ export function CropDiagnosisForm() {
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
       <Card>
         <CardHeader>
-          <CardTitle className="font-headline">Submit for Diagnosis</CardTitle>
-          <CardDescription>Upload an image and describe the issue.</CardDescription>
+          <CardTitle className="font-headline">{t('submitTitle')}</CardTitle>
+          <CardDescription>{t('submitDescription')}</CardDescription>
         </CardHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)}>
@@ -181,7 +205,7 @@ export function CropDiagnosisForm() {
                 name="photo"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Crop Photo</FormLabel>
+                    <FormLabel>{t('cropPhoto')}</FormLabel>
                     <FormControl>
                       <div className="flex items-center justify-center w-full">
                         <label htmlFor="dropzone-file" className="flex flex-col items-center justify-center w-full h-64 border-2 border-dashed rounded-lg cursor-pointer bg-card hover:bg-muted/50">
@@ -190,8 +214,8 @@ export function CropDiagnosisForm() {
                           ) : (
                             <div className="flex flex-col items-center justify-center pt-5 pb-6">
                               <UploadCloud className="w-8 h-8 mb-4 text-muted-foreground" />
-                              <p className="mb-2 text-sm text-muted-foreground"><span className="font-semibold">Click to upload</span> or drag and drop</p>
-                              <p className="text-xs text-muted-foreground">PNG, JPG or JPEG</p>
+                              <p className="mb-2 text-sm text-muted-foreground"><span className="font-semibold">{t('uploadPrompt')}</span> {t('uploadOrDrag')}</p>
+                              <p className="text-xs text-muted-foreground">{t('fileTypes')}</p>
                             </div>
                           )}
                           <Input id="dropzone-file" type="file" className="hidden" accept="image/png, image/jpeg, image/jpg"
@@ -212,10 +236,10 @@ export function CropDiagnosisForm() {
                 name="description"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Description of Symptoms</FormLabel>
+                    <FormLabel>{t('symptomsLabel')}</FormLabel>
                     <FormControl>
                       <div className="relative">
-                        <Textarea placeholder="e.g., Yellow spots on leaves, wilting stems, etc. You can also use the microphone to record your description." {...field} />
+                        <Textarea placeholder={t('symptomsPlaceholder')} {...field} />
                         <Button
                           type="button"
                           size="icon"
@@ -241,7 +265,7 @@ export function CropDiagnosisForm() {
             <CardFooter>
               <Button type="submit" disabled={loading} className="w-full">
                 {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                Diagnose
+                {t('diagnoseButton')}
               </Button>
             </CardFooter>
           </form>
@@ -252,14 +276,14 @@ export function CropDiagnosisForm() {
         <CardHeader>
           <div className="flex flex-row items-start justify-between">
             <div>
-              <CardTitle className="font-headline">Diagnosis Result</CardTitle>
-              <CardDescription>AI-powered analysis and recommendations.</CardDescription>
+              <CardTitle className="font-headline">{t('resultTitle')}</CardTitle>
+              <CardDescription>{t('resultDescription')}</CardDescription>
             </div>
              {result && (
               <div className="flex items-center gap-2">
                 <Select value={ttsLanguage} onValueChange={setTtsLanguage}>
                   <SelectTrigger className="w-[120px]">
-                    <SelectValue placeholder="Language" />
+                    <SelectValue placeholder={t('language')} />
                   </SelectTrigger>
                   <SelectContent>
                     {languages.map((lang) => (
@@ -269,9 +293,9 @@ export function CropDiagnosisForm() {
                     ))}
                   </SelectContent>
                 </Select>
-                <Button variant="outline" size="icon" onClick={handleListen} disabled={audioLoading}>
+                <Button variant="outline" size="icon" onClick={handleListen} disabled={audioLoading} title={t('listenButton')}>
                   {audioLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Volume2 className="h-4 w-4" />}
-                  <span className="sr-only">Listen to diagnosis</span>
+                  <span className="sr-only">{t('listenButton')}</span>
                 </Button>
               </div>
             )}
@@ -302,28 +326,28 @@ export function CropDiagnosisForm() {
                 </div>
                 <div>
                   <h3 className="text-lg font-semibold">{result.diseaseName}</h3>
-                  <p className="text-sm text-muted-foreground">Identified Disease</p>
+                  <p className="text-sm text-muted-foreground">{t('disease')}</p>
                 </div>
               </div>
               <div className="space-y-4">
                 <div className="flex gap-4">
                   <Bug className="h-5 w-5 mt-1 text-accent flex-shrink-0" />
                   <div>
-                    <h4 className="font-semibold">Possible Causes</h4>
+                    <h4 className="font-semibold">{t('causes')}</h4>
                     <p className="text-muted-foreground">{result.possibleCauses}</p>
                   </div>
                 </div>
                 <div className="flex gap-4">
                   <FlaskConical className="h-5 w-5 mt-1 text-accent flex-shrink-0" />
                   <div>
-                    <h4 className="font-semibold">Recommended Remedies</h4>
+                    <h4 className="font-semibold">{t('remedies')}</h4>
                     <p className="text-muted-foreground">{result.recommendedRemedies}</p>
                   </div>
                 </div>
                 <div className="flex gap-4">
                   <ShieldCheck className="h-5 w-5 mt-1 text-accent flex-shrink-0" />
                   <div>
-                    <h4 className="font-semibold">Preventive Measures</h4>
+                    <h4 className="font-semibold">{t('prevention')}</h4>
                     <p className="text-muted-foreground">{result.preventiveMeasures}</p>
                   </div>
                 </div>
@@ -332,7 +356,7 @@ export function CropDiagnosisForm() {
           )}
           {!loading && !result && !error && (
             <div className="text-center text-muted-foreground py-10">
-              Your diagnosis results will appear here.
+              {t('resultsPlaceholder')}
             </div>
           )}
         </CardContent>

@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState } from 'react';
@@ -12,6 +13,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { Loader2, Landmark, Building, PersonStanding } from 'lucide-react';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { recommendGovSchemes, type RecommendGovSchemesOutput } from '@/ai/flows/government-scheme-recommendation';
+import { useTranslation } from '@/hooks/use-translation';
+
 
 const formSchema = z.object({
   state: z.string().min(1, 'Please select a state.'),
@@ -24,10 +27,29 @@ const indianStates = [
   "Odisha", "Punjab", "Rajasthan", "Sikkim", "Tamil Nadu", "Telangana", "Tripura", "Uttar Pradesh", "Uttarakhand", "West Bengal"
 ];
 
+const texts = {
+    formTitle: "Find Government Schemes",
+    formDescription: "Tell us your location and needs to find relevant schemes.",
+    stateLabel: "State",
+    statePlaceholder: "Select your state",
+    requirementsLabel: "Your Requirements",
+    requirementsPlaceholder: "e.g., I need a subsidy for irrigation equipment, or I am a woman farmer looking for financial support.",
+    findSchemesButton: "Find Schemes",
+    resultTitle: "Recommended Schemes",
+    resultDescription: "AI-curated list of schemes for you.",
+    centralSchemes: "Central Government Schemes",
+    stateSchemes: "State Government Schemes",
+    womenSchemes: "Women-Specific Schemes",
+    noSchemes: "No specific schemes found based on your requirements.",
+    resultsPlaceholder: "Your scheme recommendations will appear here."
+};
+
+
 export function GovernmentSchemesForm() {
   const [result, setResult] = useState<RecommendGovSchemesOutput | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const { t } = useTranslation(texts);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -55,8 +77,8 @@ export function GovernmentSchemesForm() {
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
       <Card>
         <CardHeader>
-          <CardTitle className="font-headline">Find Government Schemes</CardTitle>
-          <CardDescription>Tell us your location and needs to find relevant schemes.</CardDescription>
+          <CardTitle className="font-headline">{t('formTitle')}</CardTitle>
+          <CardDescription>{t('formDescription')}</CardDescription>
         </CardHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)}>
@@ -66,10 +88,10 @@ export function GovernmentSchemesForm() {
                 name="state"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>State</FormLabel>
+                    <FormLabel>{t('stateLabel')}</FormLabel>
                     <Select onValueChange={field.onChange} defaultValue={field.value}>
                       <FormControl>
-                        <SelectTrigger><SelectValue placeholder="Select your state" /></SelectTrigger>
+                        <SelectTrigger><SelectValue placeholder={t('statePlaceholder')} /></SelectTrigger>
                       </FormControl>
                       <SelectContent>
                         {indianStates.map(state => <SelectItem key={state} value={state}>{state}</SelectItem>)}
@@ -84,9 +106,9 @@ export function GovernmentSchemesForm() {
                 name="requirements"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Your Requirements</FormLabel>
+                    <FormLabel>{t('requirementsLabel')}</FormLabel>
                     <FormControl>
-                      <Textarea placeholder="e.g., I need a subsidy for irrigation equipment, or I am a woman farmer looking for financial support." {...field} />
+                      <Textarea placeholder={t('requirementsPlaceholder')} {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -96,7 +118,7 @@ export function GovernmentSchemesForm() {
             <CardFooter>
               <Button type="submit" disabled={loading} className="w-full">
                 {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                Find Schemes
+                {t('findSchemesButton')}
               </Button>
             </CardFooter>
           </form>
@@ -105,8 +127,8 @@ export function GovernmentSchemesForm() {
       
       <Card>
         <CardHeader>
-          <CardTitle className="font-headline">Recommended Schemes</CardTitle>
-          <CardDescription>AI-curated list of schemes for you.</CardDescription>
+          <CardTitle className="font-headline">{t('resultTitle')}</CardTitle>
+          <CardDescription>{t('resultDescription')}</CardDescription>
         </CardHeader>
         <CardContent>
           {loading && (
@@ -121,7 +143,7 @@ export function GovernmentSchemesForm() {
                 <AccordionTrigger>
                   <div className="flex items-center gap-2">
                     <Landmark className="h-5 w-5 text-primary" />
-                    Central Government Schemes
+                    {t('centralSchemes')}
                   </div>
                 </AccordionTrigger>
                 <AccordionContent>
@@ -134,7 +156,7 @@ export function GovernmentSchemesForm() {
                 <AccordionTrigger>
                    <div className="flex items-center gap-2">
                     <Building className="h-5 w-5 text-primary" />
-                    State Government Schemes
+                    {t('stateSchemes')}
                   </div>
                 </AccordionTrigger>
                 <AccordionContent>
@@ -147,12 +169,12 @@ export function GovernmentSchemesForm() {
                 <AccordionTrigger>
                    <div className="flex items-center gap-2">
                     <PersonStanding className="h-5 w-5 text-primary" />
-                    Women-Specific Schemes
+                    {t('womenSchemes')}
                   </div>
                 </AccordionTrigger>
                 <AccordionContent>
                   <ul className="list-disc pl-6 space-y-1 text-muted-foreground">
-                     {result.womenSchemes.length > 0 ? result.womenSchemes.map((scheme, index) => <li key={index}>{scheme}</li>) : <li>No specific schemes found based on your requirements.</li>}
+                     {result.womenSchemes.length > 0 ? result.womenSchemes.map((scheme, index) => <li key={index}>{scheme}</li>) : <li>{t('noSchemes')}</li>}
                   </ul>
                 </AccordionContent>
               </AccordionItem>
@@ -160,7 +182,7 @@ export function GovernmentSchemesForm() {
           )}
           {!loading && !result && !error && (
             <div className="text-center text-muted-foreground py-10">
-              Your scheme recommendations will appear here.
+              {t('resultsPlaceholder')}
             </div>
           )}
         </CardContent>
