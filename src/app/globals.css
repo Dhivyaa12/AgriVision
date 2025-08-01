@@ -97,11 +97,11 @@ body {
     left: 0;
     right: 0;
     bottom: 0;
-    background-color: hsla(var(--background));
+    background-color: hsla(var(--background), 0.8);
     z-index: -1;
   }
 
   .dark body::before {
-    background-color: hsla(var(--background));
+    background-color: hsla(var(--background), 0.9);
   }
 }
