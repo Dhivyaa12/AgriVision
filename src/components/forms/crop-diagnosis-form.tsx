@@ -110,34 +110,39 @@ export function CropDiagnosisForm() {
       return;
     }
 
-    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-    mediaRecorderRef.current = new MediaRecorder(stream);
-    mediaRecorderRef.current.ondataavailable = (event) => {
-      audioChunksRef.current.push(event.data);
-    };
-    mediaRecorderRef.current.onstop = async () => {
-      setRecordingLoading(true);
-      const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/wav' });
-      const reader = new FileReader();
-      reader.readAsDataURL(audioBlob);
-      reader.onloadend = async () => {
-        const audioDataUri = reader.result as string;
-        try {
-          const { text } = await speechToText({ audioDataUri });
-          form.setValue('description', text);
-        } catch (e) {
-          console.error(e);
-          setError('Failed to transcribe audio.');
-        } finally {
-          setRecordingLoading(false);
-        }
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      mediaRecorderRef.current = new MediaRecorder(stream);
+      mediaRecorderRef.current.ondataavailable = (event) => {
+        audioChunksRef.current.push(event.data);
+      };
+      mediaRecorderRef.current.onstop = async () => {
+        setRecordingLoading(true);
+        const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/wav' });
+        const reader = new FileReader();
+        reader.readAsDataURL(audioBlob);
+        reader.onloadend = async () => {
+          const audioDataUri = reader.result as string;
+          try {
+            const { text } = await speechToText({ audioDataUri });
+            form.setValue('description', form.getValues('description') + text);
+          } catch (e) {
+            console.error(e);
+            setError('Failed to transcribe audio.');
+          } finally {
+            setRecordingLoading(false);
+          }
+        };
+        audioChunksRef.current = [];
+        stream.getTracks().forEach(track => track.stop());
       };
       audioChunksRef.current = [];
-      stream.getTracks().forEach(track => track.stop());
-    };
-    audioChunksRef.current = [];
-    mediaRecorderRef.current.start();
-    setIsRecording(true);
+      mediaRecorderRef.current.start();
+      setIsRecording(true);
+    } catch (err) {
+      console.error("Error accessing microphone:", err);
+      setError("Could not access microphone. Please ensure you have given permission.");
+    }
   };
 
   return (
@@ -189,7 +194,7 @@ export function CropDiagnosisForm() {
                     <FormLabel>Description of Symptoms</FormLabel>
                     <FormControl>
                       <div className="relative">
-                        <Textarea placeholder="e.g., Yellow spots on leaves, wilting stems, etc." {...field} />
+                        <Textarea placeholder="e.g., Yellow spots on leaves, wilting stems, etc. You can also use the microphone to record your description." {...field} />
                         <Button
                           type="button"
                           size="icon"
@@ -200,9 +205,10 @@ export function CropDiagnosisForm() {
                             "absolute bottom-2 right-2",
                             isRecording && "text-red-500 hover:text-red-600"
                           )}
+                          title={isRecording ? "Stop recording" : "Start recording"}
                         >
-                          {isRecording ? <MicOff /> : <Mic />}
-                          {recordingLoading && <Loader2 className="absolute h-4 w-4 animate-spin" />}
+                          {recordingLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : (isRecording ? <MicOff /> : <Mic />)}
+                          <span className="sr-only">{isRecording ? "Stop recording" : "Start recording"}</span>
                         </Button>
                       </div>
                     </FormControl>
