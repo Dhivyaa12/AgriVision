@@ -10,8 +10,9 @@ import { Button } from '@/components/ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Loader2, UploadCloud, Leaf, AlertTriangle, Bug, FlaskConical, ShieldCheck } from 'lucide-react';
+import { Loader2, UploadCloud, Leaf, AlertTriangle, Bug, FlaskConical, ShieldCheck, Volume2 } from 'lucide-react';
 import { diagnoseCrop, type DiagnoseCropOutput } from '@/ai/flows/crop-diagnosis';
+import { textToSpeech } from '@/ai/flows/text-to-speech';
 
 const formSchema = z.object({
   photo: z.any().refine((file) => file?.[0], 'Please upload an image.'),
@@ -23,6 +24,8 @@ export function CropDiagnosisForm() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [preview, setPreview] = useState<string | null>(null);
+  const [audioDataUri, setAudioDataUri] = useState<string | null>(null);
+  const [audioLoading, setAudioLoading] = useState(false);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -46,6 +49,7 @@ export function CropDiagnosisForm() {
     setLoading(true);
     setResult(null);
     setError(null);
+    setAudioDataUri(null);
 
     try {
       const file = values.photo[0];
@@ -68,6 +72,27 @@ export function CropDiagnosisForm() {
       setError('An error occurred during diagnosis.');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleListen = async () => {
+    if (!result) return;
+    setAudioLoading(true);
+    setAudioDataUri(null);
+    try {
+      const textToRead = `
+        Disease: ${result.diseaseName}.
+        Possible Causes: ${result.possibleCauses}.
+        Recommended Remedies: ${result.recommendedRemedies}.
+        Preventive Measures: ${result.preventiveMeasures}.
+      `;
+      const response = await textToSpeech({ text: textToRead });
+      setAudioDataUri(response.audioDataUri);
+    } catch (e) {
+      console.error(e);
+      setError('An error occurred during audio generation.');
+    } finally {
+      setAudioLoading(false);
     }
   };
 
@@ -137,9 +162,17 @@ export function CropDiagnosisForm() {
       </Card>
 
       <Card>
-        <CardHeader>
-          <CardTitle className="font-headline">Diagnosis Result</CardTitle>
-          <CardDescription>AI-powered analysis and recommendations.</CardDescription>
+        <CardHeader className="flex flex-row items-start justify-between">
+          <div>
+            <CardTitle className="font-headline">Diagnosis Result</CardTitle>
+            <CardDescription>AI-powered analysis and recommendations.</CardDescription>
+          </div>
+           {result && (
+            <Button variant="outline" size="icon" onClick={handleListen} disabled={audioLoading}>
+              {audioLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Volume2 className="h-4 w-4" />}
+              <span className="sr-only">Listen to diagnosis</span>
+            </Button>
+          )}
         </CardHeader>
         <CardContent>
           {loading && (
@@ -148,6 +181,16 @@ export function CropDiagnosisForm() {
             </div>
           )}
           {error && <p className="text-destructive">{error}</p>}
+          
+          {audioDataUri && (
+            <div className="mb-4">
+               <audio controls autoPlay className="w-full">
+                <source src={audioDataUri} type="audio/wav" />
+                Your browser does not support the audio element.
+              </audio>
+            </div>
+          )}
+
           {result && (
             <div className="space-y-6">
               <div className="flex items-center gap-4">
