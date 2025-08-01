@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import Image from 'next/image';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -10,9 +10,11 @@ import { Button } from '@/components/ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Loader2, UploadCloud, Leaf, AlertTriangle, Bug, FlaskConical, ShieldCheck, Volume2 } from 'lucide-react';
+import { Loader2, UploadCloud, Leaf, AlertTriangle, Bug, FlaskConical, ShieldCheck, Volume2, Mic, MicOff } from 'lucide-react';
 import { diagnoseCrop, type DiagnoseCropOutput } from '@/ai/flows/crop-diagnosis';
 import { textToSpeech } from '@/ai/flows/text-to-speech';
+import { speechToText } from '@/ai/flows/speech-to-text';
+import { cn } from '@/lib/utils';
 
 const formSchema = z.object({
   photo: z.any().refine((file) => file?.[0], 'Please upload an image.'),
@@ -26,6 +28,11 @@ export function CropDiagnosisForm() {
   const [preview, setPreview] = useState<string | null>(null);
   const [audioDataUri, setAudioDataUri] = useState<string | null>(null);
   const [audioLoading, setAudioLoading] = useState(false);
+
+  const [isRecording, setIsRecording] = useState(false);
+  const [recordingLoading, setRecordingLoading] = useState(false);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const audioChunksRef = useRef<Blob[]>([]);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -96,6 +103,43 @@ export function CropDiagnosisForm() {
     }
   };
 
+  const handleRecording = async () => {
+    if (isRecording) {
+      mediaRecorderRef.current?.stop();
+      setIsRecording(false);
+      return;
+    }
+
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    mediaRecorderRef.current = new MediaRecorder(stream);
+    mediaRecorderRef.current.ondataavailable = (event) => {
+      audioChunksRef.current.push(event.data);
+    };
+    mediaRecorderRef.current.onstop = async () => {
+      setRecordingLoading(true);
+      const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/wav' });
+      const reader = new FileReader();
+      reader.readAsDataURL(audioBlob);
+      reader.onloadend = async () => {
+        const audioDataUri = reader.result as string;
+        try {
+          const { text } = await speechToText({ audioDataUri });
+          form.setValue('description', text);
+        } catch (e) {
+          console.error(e);
+          setError('Failed to transcribe audio.');
+        } finally {
+          setRecordingLoading(false);
+        }
+      };
+      audioChunksRef.current = [];
+      stream.getTracks().forEach(track => track.stop());
+    };
+    audioChunksRef.current = [];
+    mediaRecorderRef.current.start();
+    setIsRecording(true);
+  };
+
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
       <Card>
@@ -124,7 +168,7 @@ export function CropDiagnosisForm() {
                               <p className="text-xs text-muted-foreground">PNG, JPG or JPEG</p>
                             </div>
                           )}
-                          <Input id="dropzone-file" type="file" className="hidden" accept="image/png, image/jpeg, image/jpg" 
+                          <Input id="dropzone-file" type="file" className="hidden" accept="image/png, image/jpeg, image/jpg"
                             onChange={(e) => {
                               field.onChange(e.target.files);
                               handleFileChange(e);
@@ -144,7 +188,23 @@ export function CropDiagnosisForm() {
                   <FormItem>
                     <FormLabel>Description of Symptoms</FormLabel>
                     <FormControl>
-                      <Textarea placeholder="e.g., Yellow spots on leaves, wilting stems, etc." {...field} />
+                      <div className="relative">
+                        <Textarea placeholder="e.g., Yellow spots on leaves, wilting stems, etc." {...field} />
+                        <Button
+                          type="button"
+                          size="icon"
+                          variant="ghost"
+                          onClick={handleRecording}
+                          disabled={recordingLoading}
+                          className={cn(
+                            "absolute bottom-2 right-2",
+                            isRecording && "text-red-500 hover:text-red-600"
+                          )}
+                        >
+                          {isRecording ? <MicOff /> : <Mic />}
+                          {recordingLoading && <Loader2 className="absolute h-4 w-4 animate-spin" />}
+                        </Button>
+                      </div>
                     </FormControl>
                     <FormMessage />
                   </FormItem>
