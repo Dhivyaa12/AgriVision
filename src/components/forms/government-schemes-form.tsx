@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import { Loader2, Landmark, Building, Female } from 'lucide-react';
+import { Loader2, Landmark, Building, PersonStanding } from 'lucide-react';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { recommendGovSchemes, type RecommendGovSchemesOutput } from '@/ai/flows/government-scheme-recommendation';
 
@@ -146,7 +146,7 @@ export function GovernmentSchemesForm() {
               <AccordionItem value="women">
                 <AccordionTrigger>
                    <div className="flex items-center gap-2">
-                    <Female className="h-5 w-5 text-primary" />
+                    <PersonStanding className="h-5 w-5 text-primary" />
                     Women-Specific Schemes
                   </div>
                 </AccordionTrigger>
