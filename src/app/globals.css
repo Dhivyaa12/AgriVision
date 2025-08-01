@@ -84,7 +84,7 @@ body {
   }
   body {
     @apply bg-background text-foreground;
-    background-image: url('http://googleusercontent.com/image_generation_content/1');
+    background-image: url('http://googleusercontent.com/image_generation_content/2');
     background-size: cover;
     background-position: center;
     background-attachment: fixed;
