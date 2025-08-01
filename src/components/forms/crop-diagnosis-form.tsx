@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
@@ -16,11 +17,22 @@ import { textToSpeech } from '@/ai/flows/text-to-speech';
 import { speechToText } from '@/ai/flows/speech-to-text';
 import { cn } from '@/lib/utils';
 import { useLanguage } from '@/hooks/use-language';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+
 
 const formSchema = z.object({
   photo: z.any().refine((file) => file?.[0], 'Please upload an image.'),
   description: z.string().min(10, 'Please provide a detailed description.'),
 });
+
+const languages = [
+  { value: 'en', label: 'English' },
+  { value: 'ta', label: 'Tamil' },
+  { value: 'hi', label: 'Hindi' },
+  { value: 'ml', label: 'Malayalam' },
+  { value: 'te', label: 'Telugu' },
+  { value: 'kn', label: 'Kannada' },
+];
 
 export function CropDiagnosisForm() {
   const [result, setResult] = useState<DiagnoseCropOutput | null>(null);
@@ -36,6 +48,11 @@ export function CropDiagnosisForm() {
   const audioChunksRef = useRef<Blob[]>([]);
   
   const { language } = useLanguage();
+  const [ttsLanguage, setTtsLanguage] = useState(language);
+
+  useEffect(() => {
+    setTtsLanguage(language);
+  }, [language]);
 
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -97,7 +114,7 @@ export function CropDiagnosisForm() {
         Recommended Remedies: ${result.recommendedRemedies}.
         Preventive Measures: ${result.preventiveMeasures}.
       `;
-      const response = await textToSpeech({ text: textToRead, language: language });
+      const response = await textToSpeech({ text: textToRead, language: ttsLanguage });
       setAudioDataUri(response.audioDataUri);
     } catch (e) {
       console.error(e);
@@ -232,17 +249,33 @@ export function CropDiagnosisForm() {
       </Card>
 
       <Card>
-        <CardHeader className="flex flex-row items-start justify-between">
-          <div>
-            <CardTitle className="font-headline">Diagnosis Result</CardTitle>
-            <CardDescription>AI-powered analysis and recommendations.</CardDescription>
+        <CardHeader>
+          <div className="flex flex-row items-start justify-between">
+            <div>
+              <CardTitle className="font-headline">Diagnosis Result</CardTitle>
+              <CardDescription>AI-powered analysis and recommendations.</CardDescription>
+            </div>
+             {result && (
+              <div className="flex items-center gap-2">
+                <Select value={ttsLanguage} onValueChange={setTtsLanguage}>
+                  <SelectTrigger className="w-[120px]">
+                    <SelectValue placeholder="Language" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {languages.map((lang) => (
+                      <SelectItem key={lang.value} value={lang.value}>
+                        {lang.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <Button variant="outline" size="icon" onClick={handleListen} disabled={audioLoading}>
+                  {audioLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Volume2 className="h-4 w-4" />}
+                  <span className="sr-only">Listen to diagnosis</span>
+                </Button>
+              </div>
+            )}
           </div>
-           {result && (
-            <Button variant="outline" size="icon" onClick={handleListen} disabled={audioLoading}>
-              {audioLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Volume2 className="h-4 w-4" />}
-              <span className="sr-only">Listen to diagnosis</span>
-            </Button>
-          )}
         </CardHeader>
         <CardContent>
           {loading && (
