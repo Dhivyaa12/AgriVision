@@ -5,7 +5,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useLanguage } from './use-language';
 import { translateText } from '@/ai/flows/translate-text';
 
-const translationsCache: { [lang: string]: { [key: string]: string } } = {};
+const translationsCache: { [lang: string]: { [originalText: string]: string } } = {};
 
 export function useTranslation(texts: { [key: string]: string }) {
   const { language } = useLanguage();
@@ -18,46 +18,58 @@ export function useTranslation(texts: { [key: string]: string }) {
       return;
     }
 
+    // Check if all required translations are already in the cache for the current language
     if (translationsCache[language]) {
-        const cachedTranslations = { ...texts };
-        let allKeysCached = true;
-        for (const key in texts) {
-            if (translationsCache[language][texts[key]]) {
-                cachedTranslations[key] = translationsCache[language][texts[key]];
-            } else {
-                allKeysCached = false;
-                break;
-            }
-        }
-        if (allKeysCached) {
-            setTranslations(cachedTranslations);
-            return;
-        }
-    }
+      const allTextsAreCached = Object.values(texts).every(
+        (originalText) => translationsCache[language][originalText]
+      );
 
+      if (allTextsAreCached) {
+        const newTranslations: { [key: string]: string } = {};
+        for (const key in texts) {
+          newTranslations[key] = translationsCache[language][texts[key]];
+        }
+        setTranslations(newTranslations);
+        return; // All translations found in cache, no need to call API
+      }
+    }
 
     setIsTranslating(true);
     const newTranslations: { [key: string]: string } = { ...texts };
 
     if (!translationsCache[language]) {
-        translationsCache[language] = {};
+      translationsCache[language] = {};
     }
 
+    // Create a list of promises for translations not in the cache
+    const translationPromises = Object.keys(texts)
+      .filter((key) => !translationsCache[language][texts[key]])
+      .map(async (key) => {
+        const originalText = texts[key];
+        try {
+          const result = await translateText({ text: originalText, targetLanguage: language });
+          return { key, translatedText: result.translatedText, originalText };
+        } catch (error) {
+          console.error(`Could not translate '${originalText}':`, error);
+          return { key, translatedText: originalText, originalText }; // Keep original text on error
+        }
+      });
+      
+    // Execute all translation requests in parallel
+    const settledTranslations = await Promise.all(translationPromises);
+
+    // Apply cached and new translations
     for (const key in texts) {
-      const originalText = texts[key];
-      if (translationsCache[language][originalText]) {
-        newTranslations[key] = translationsCache[language][originalText];
-        continue;
-      }
-      try {
-        const result = await translateText({ text: originalText, targetLanguage: language });
-        newTranslations[key] = result.translatedText;
-        translationsCache[language][originalText] = result.translatedText;
-      } catch (error) {
-        console.error(`Could not translate '${originalText}':`, error);
-        // Keep original text on error
-      }
+        const originalText = texts[key];
+        if (translationsCache[language][originalText]) {
+            newTranslations[key] = translationsCache[language][originalText];
+        }
     }
+
+    settledTranslations.forEach(({ key, translatedText, originalText }) => {
+      newTranslations[key] = translatedText;
+      translationsCache[language][originalText] = translatedText;
+    });
 
     setTranslations(newTranslations);
     setIsTranslating(false);
