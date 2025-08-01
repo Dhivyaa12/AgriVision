@@ -1,3 +1,4 @@
+
 'use server';
 
 /**
@@ -32,7 +33,15 @@ export async function textToSpeech(input: TextToSpeechInput): Promise<TextToSpee
 const getVoiceForLanguage = (language?: string) => {
     switch (language) {
       case 'ta':
-        return 'Achernar'; 
+        return 'Achernar';
+      case 'hi':
+        return 'Achird';
+      case 'te':
+        return 'Alnilam';
+      case 'kn':
+        return 'Erinome';
+      case 'ml':
+        return 'Gacrux';
       case 'en':
       default:
         return 'Algenib';
