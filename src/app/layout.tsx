@@ -1,6 +1,4 @@
-
 'use client';
-
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import {
@@ -11,8 +9,6 @@ import {
   LineChart,
   Settings,
   LifeBuoy,
-  LogOut,
-  ChevronRight
 } from "lucide-react"
 
 import './globals.css';
@@ -31,7 +27,6 @@ import {
   SidebarTrigger,
   SidebarInset,
 } from '@/components/ui/sidebar'
-import { Button } from '@/components/ui/button';
 import { UserNav } from '@/components/user-nav';
 import { Separator } from '@/components/ui/separator';
 import { LanguageProvider } from '@/hooks/use-language';
@@ -105,7 +100,7 @@ function AppLayout({ children }: { children: React.ReactNode }) {
         </SidebarContent>
         <SidebarFooter>
           <Separator className="my-2" />
-           <SidebarMenu>
+          <SidebarMenu>
             <SidebarMenuItem>
               <SidebarMenuButton>
                 <LifeBuoy />
