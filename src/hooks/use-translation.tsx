@@ -9,7 +9,14 @@ const translationsCache: { [lang: string]: { [originalText: string]: string } } 
 
 export function useTranslation(texts: { [key: string]: string }) {
   const { language } = useLanguage();
-  const [translations, setTranslations] = useState<{ [key: string]: string }>(texts);
+  const [translations, setTranslations] = useState<{ [key: string]: string }>(() => {
+    // Initialize with English texts
+    const initial: { [key: string]: string } = {};
+    for (const key in texts) {
+        initial[key] = texts[key];
+    }
+    return initial;
+  });
   const [isTranslating, setIsTranslating] = useState(false);
   
   const textValues = useMemo(() => Object.values(texts), [texts]);
@@ -25,36 +32,43 @@ export function useTranslation(texts: { [key: string]: string }) {
     }
     
     const cachedTranslations = translationsCache[language];
-    const textsToTranslate = textValues.filter(originalText => !cachedTranslations[originalText]);
+    
+    // Check if all required translations are already in the cache
+    const allCached = Object.keys(texts).every(key => cachedTranslations[texts[key]]);
 
-    if (textsToTranslate.length === 0) {
-      const newTranslations: { [key: string]: string } = {};
-      for (const key in texts) {
-        const originalText = texts[key];
-        newTranslations[key] = cachedTranslations[originalText] || originalText;
-      }
-      setTranslations(newTranslations);
-      return;
+    if (allCached) {
+        const newTranslations: { [key: string]: string } = {};
+        for (const key in texts) {
+            newTranslations[key] = cachedTranslations[texts[key]];
+        }
+        setTranslations(newTranslations);
+        return;
     }
-
+    
     setIsTranslating(true);
     
     try {
-        const translationPromises = textsToTranslate.map(async (originalText) => {
-            try {
-                const result = await translateText({ text: originalText, targetLanguage: language });
-                return { translatedText: result.translatedText, originalText };
-            } catch (error) {
-                console.error(`Could not translate '${originalText}':`, error);
-                return { translatedText: originalText, originalText }; // Keep original text on error
-            }
-        });
+        const textsToTranslate = Object.keys(texts)
+            .filter(key => !cachedTranslations[texts[key]])
+            .map(key => ({ key, originalText: texts[key] }));
 
-      const settledTranslations = await Promise.all(translationPromises);
-
-      settledTranslations.forEach(({ originalText, translatedText }) => {
-        cachedTranslations[originalText] = translatedText;
-      });
+        if (textsToTranslate.length > 0) {
+            const translationPromises = textsToTranslate.map(async ({ key, originalText }) => {
+                try {
+                    const result = await translateText({ text: originalText, targetLanguage: language });
+                    return { key, originalText, translatedText: result.translatedText };
+                } catch (error) {
+                    console.error(`Could not translate '${originalText}':`, error);
+                    return { key, originalText, translatedText: originalText }; // Keep original text on error
+                }
+            });
+    
+          const settledTranslations = await Promise.all(translationPromises);
+    
+          settledTranslations.forEach(({ originalText, translatedText }) => {
+            cachedTranslations[originalText] = translatedText;
+          });
+        }
 
       const newTranslations: { [key: string]: string } = {};
        for (const key in texts) {
@@ -68,7 +82,7 @@ export function useTranslation(texts: { [key: string]: string }) {
     } finally {
         setIsTranslating(false);
     }
-  }, [language, texts, textValues]);
+  }, [language, texts]);
 
   useEffect(() => {
     translateAll();
