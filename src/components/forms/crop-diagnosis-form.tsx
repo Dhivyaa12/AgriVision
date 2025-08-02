@@ -54,6 +54,7 @@ const texts = {
     remedies: "Recommended Remedies",
     prevention: "Preventive Measures",
     resultsPlaceholder: "Your diagnosis results will appear here.",
+    quotaError: "You have exceeded your API quota. Please try again later or check your billing plan.",
 };
 
 export function CropDiagnosisForm() {
@@ -108,21 +109,32 @@ export function CropDiagnosisForm() {
       const reader = new FileReader();
       reader.readAsDataURL(file);
       reader.onload = async () => {
-        const photoDataUri = reader.result as string;
-        const response = await diagnoseCrop({
-          photoDataUri,
-          description: values.description,
-        });
-        setResult(response);
+        try {
+            const photoDataUri = reader.result as string;
+            const response = await diagnoseCrop({
+              photoDataUri,
+              description: values.description,
+            });
+            setResult(response);
+        } catch(e: any) {
+            if (e.message?.includes('429')) {
+                setError(t('quotaError'));
+            } else {
+                setError('An error occurred during diagnosis.');
+            }
+            console.error(e);
+        } finally {
+            setLoading(false);
+        }
       };
       reader.onerror = (error) => {
         console.error('Error reading file:', error);
         setError('Failed to read the image file.');
+        setLoading(false);
       };
     } catch (e) {
       console.error(e);
       setError('An error occurred during diagnosis.');
-    } finally {
       setLoading(false);
     }
   };
@@ -364,3 +376,5 @@ export function CropDiagnosisForm() {
     </div>
   );
 }
+
+    
