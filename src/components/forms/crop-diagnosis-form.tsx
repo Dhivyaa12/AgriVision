@@ -143,6 +143,7 @@ export function CropDiagnosisForm() {
     if (!result) return;
     setAudioLoading(true);
     setAudioDataUri(null);
+    setError(null);
     try {
       const textToRead = `
         Disease: ${result.diseaseName}.
@@ -152,9 +153,13 @@ export function CropDiagnosisForm() {
       `;
       const response = await textToSpeech({ text: textToRead, language: ttsLanguage });
       setAudioDataUri(response.audioDataUri);
-    } catch (e) {
+    } catch (e: any) {
       console.error(e);
-      setError('An error occurred during audio generation.');
+      if (e.message?.includes('429')) {
+          setError(t('quotaError'));
+      } else {
+          setError('An error occurred during audio generation.');
+      }
     } finally {
       setAudioLoading(false);
     }
@@ -376,5 +381,3 @@ export function CropDiagnosisForm() {
     </div>
   );
 }
-
-    
