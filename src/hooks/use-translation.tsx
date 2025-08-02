@@ -30,7 +30,8 @@ export function useTranslation(texts: { [key: string]: string }) {
     if (textsToTranslate.length === 0) {
       const newTranslations: { [key: string]: string } = {};
       for (const key in texts) {
-        newTranslations[key] = cachedTranslations[texts[key]];
+        const originalText = texts[key];
+        newTranslations[key] = cachedTranslations[originalText] || originalText;
       }
       setTranslations(newTranslations);
       return;
@@ -38,17 +39,17 @@ export function useTranslation(texts: { [key: string]: string }) {
 
     setIsTranslating(true);
     
-    const translationPromises = textsToTranslate.map(async (originalText) => {
-      try {
-        const result = await translateText({ text: originalText, targetLanguage: language });
-        return { translatedText: result.translatedText, originalText };
-      } catch (error) {
-        console.error(`Could not translate '${originalText}':`, error);
-        return { translatedText: originalText, originalText }; // Keep original text on error
-      }
-    });
-
     try {
+        const translationPromises = textsToTranslate.map(async (originalText) => {
+            try {
+                const result = await translateText({ text: originalText, targetLanguage: language });
+                return { translatedText: result.translatedText, originalText };
+            } catch (error) {
+                console.error(`Could not translate '${originalText}':`, error);
+                return { translatedText: originalText, originalText }; // Keep original text on error
+            }
+        });
+
       const settledTranslations = await Promise.all(translationPromises);
 
       settledTranslations.forEach(({ originalText, translatedText }) => {
@@ -57,7 +58,8 @@ export function useTranslation(texts: { [key: string]: string }) {
 
       const newTranslations: { [key: string]: string } = {};
        for (const key in texts) {
-        newTranslations[key] = cachedTranslations[texts[key]] || texts[key];
+        const originalText = texts[key];
+        newTranslations[key] = cachedTranslations[originalText] || originalText;
       }
       setTranslations(newTranslations);
 
