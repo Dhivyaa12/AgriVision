@@ -173,6 +173,7 @@ export function CropDiagnosisForm() {
     }
 
     try {
+      setError(null);
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       mediaRecorderRef.current = new MediaRecorder(stream);
       mediaRecorderRef.current.ondataavailable = (event) => {
@@ -206,6 +207,7 @@ export function CropDiagnosisForm() {
       setError("Could not access microphone. Please ensure you have given permission.");
     }
   };
+
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
