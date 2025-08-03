@@ -42,9 +42,10 @@ const texts = {
   welcome: "Welcome to AgriVision",
   tagline: "Your AI-powered assistant for smarter farming.",
   ...Object.keys(featuresData).reduce((acc, key) => {
-    acc[`${key}_title`] = featuresData[key as keyof typeof featuresData].title;
-    acc[`${key}_description`] = featuresData[key as keyof typeof featuresData].description;
-    acc[`${key}_cta`] = featuresData[key as keyof typeof featuresData].cta;
+    const featureKey = key as keyof typeof featuresData;
+    acc[`${key}_title`] = featuresData[featureKey].title;
+    acc[`${key}_description`] = featuresData[featureKey].description;
+    acc[`${key}_cta`] = featuresData[featureKey].cta;
     return acc;
   }, {} as { [key: string]: string })
 };
@@ -92,23 +93,6 @@ export default function DashboardPage() {
           );
         })}
       </div>
-
-       <Card className="relative overflow-hidden group h-[400px]">
-          <Image
-            src="https://placehold.co/1200x400.png"
-            alt="Farmer in field"
-            layout="fill"
-            objectFit="cover"
-            className="transition-transform duration-500 group-hover:scale-105"
-            data-ai-hint="farmer field technology"
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent" />
-          <div className="absolute bottom-0 left-0 p-6">
-              <h3 className="text-2xl font-headline font-bold text-white">Empowering the pillars of our nation.</h3>
-              <p className="text-white/90 mt-2">Bringing cutting-edge technology to the heart of agriculture.</p>
-          </div>
-      </Card>
-
     </div>
   );
 }
