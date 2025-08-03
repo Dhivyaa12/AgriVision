@@ -10,7 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import { Loader2, Landmark, Building, PersonStanding, Mic, MicOff } from 'lucide-react';
+import { Loader2, Landmark, Building, PersonStanding, Mic, MicOff, ExternalLink } from 'lucide-react';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { recommendGovSchemes, type RecommendGovSchemesOutput } from '@/ai/flows/government-scheme-recommendation';
 import { useTranslation } from '@/hooks/use-translation';
@@ -72,7 +72,7 @@ export function GovernmentSchemesForm() {
     try {
       const response = await recommendGovSchemes({
         state: values.state,
-        requirements: values.requirements || "general",
+        requirements: values.requirements,
       });
       setResult(response);
     } catch (e) {
@@ -218,8 +218,15 @@ export function GovernmentSchemesForm() {
                   </div>
                 </AccordionTrigger>
                 <AccordionContent>
-                  <ul className="list-disc pl-6 space-y-1 text-muted-foreground">
-                    {result.centralSchemes.length > 0 ? result.centralSchemes.map((scheme, index) => <li key={index}>{scheme}</li>) : <li>{t('noSchemes')}</li>}
+                  <ul className="list-disc pl-6 space-y-2 text-muted-foreground">
+                    {result.centralSchemes.length > 0 ? result.centralSchemes.map((scheme, index) => (
+                      <li key={index}>
+                        <a href={scheme.url} target="_blank" rel="noopener noreferrer" className="hover:underline hover:text-primary flex items-center gap-1">
+                          {scheme.name}
+                          <ExternalLink className="h-3 w-3" />
+                        </a>
+                      </li>
+                    )) : <li>{t('noSchemes')}</li>}
                   </ul>
                 </AccordionContent>
               </AccordionItem>
@@ -231,8 +238,15 @@ export function GovernmentSchemesForm() {
                   </div>
                 </AccordionTrigger>
                 <AccordionContent>
-                  <ul className="list-disc pl-6 space-y-1 text-muted-foreground">
-                    {result.stateSchemes.length > 0 ? result.stateSchemes.map((scheme, index) => <li key={index}>{scheme}</li>) : <li>{t('noSchemes')}</li>}
+                  <ul className="list-disc pl-6 space-y-2 text-muted-foreground">
+                    {result.stateSchemes.length > 0 ? result.stateSchemes.map((scheme, index) => (
+                      <li key={index}>
+                        <a href={scheme.url} target="_blank" rel="noopener noreferrer" className="hover:underline hover:text-primary flex items-center gap-1">
+                          {scheme.name}
+                          <ExternalLink className="h-3 w-3" />
+                        </a>
+                      </li>
+                    )) : <li>{t('noSchemes')}</li>}
                   </ul>
                 </AccordionContent>
               </AccordionItem>
@@ -244,8 +258,15 @@ export function GovernmentSchemesForm() {
                   </div>
                 </AccordionTrigger>
                 <AccordionContent>
-                  <ul className="list-disc pl-6 space-y-1 text-muted-foreground">
-                     {result.womenSchemes.length > 0 ? result.womenSchemes.map((scheme, index) => <li key={index}>{scheme}</li>) : <li>{t('noSchemes')}</li>}
+                  <ul className="list-disc pl-6 space-y-2 text-muted-foreground">
+                     {result.womenSchemes.length > 0 ? result.womenSchemes.map((scheme, index) => (
+                      <li key={index}>
+                        <a href={scheme.url} target="_blank" rel="noopener noreferrer" className="hover:underline hover:text-primary flex items-center gap-1">
+                          {scheme.name}
+                          <ExternalLink className="h-3 w-3" />
+                        </a>
+                      </li>
+                    )) : <li>{t('noSchemes')}</li>}
                   </ul>
                 </AccordionContent>
               </AccordionItem>

@@ -11,6 +11,11 @@
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
 
+const SchemeSchema = z.object({
+    name: z.string().describe('The full name of the government scheme.'),
+    url: z.string().url().describe('The official government URL for the scheme.'),
+});
+
 const RecommendGovSchemesInputSchema = z.object({
   state: z.string().describe('The state for which to find government schemes.'),
   requirements: z
@@ -23,11 +28,11 @@ const RecommendGovSchemesInputSchema = z.object({
 export type RecommendGovSchemesInput = z.infer<typeof RecommendGovSchemesInputSchema>;
 
 const RecommendGovSchemesOutputSchema = z.object({
-  centralSchemes: z.array(z.string()).describe('Relevant Central Government Schemes.'),
-  stateSchemes: z.array(z.string()).describe('Applicable State Government Schemes.'),
+  centralSchemes: z.array(SchemeSchema).describe('Relevant Central Government Schemes with their names and URLs.'),
+  stateSchemes: z.array(SchemeSchema).describe('Applicable State Government Schemes with their names and URLs.'),
   womenSchemes: z
-    .array(z.string())
-    .describe('Women-specific agricultural schemes.'),
+    .array(SchemeSchema)
+    .describe('Women-specific agricultural schemes with their names and URLs.'),
 });
 export type RecommendGovSchemesOutput = z.infer<typeof RecommendGovSchemesOutputSchema>;
 
@@ -43,7 +48,7 @@ const prompt = ai.definePrompt({
   output: {schema: RecommendGovSchemesOutputSchema},
   prompt: `You are an expert in Indian government agricultural schemes.
 
-You will use the state and requirements provided to recommend relevant schemes.
+You will use the state and requirements provided to recommend relevant schemes. For each scheme, you MUST provide the official government website URL.
 
 State: {{{state}}}
 {{#if requirements}}
@@ -52,7 +57,7 @@ Requirements: {{{requirements}}}
 
 Recommend relevant Central Government Schemes, applicable State Government Schemes, and Women-specific agricultural schemes. If no specific requirements are given, provide a list of general, popular, and impactful schemes for the given state.
 
-Format your output as a JSON object with keys for centralSchemes, stateSchemes, and womenSchemes. Each key should contain a list of schemes.`,
+Format your output as a JSON object with keys for centralSchemes, stateSchemes, and womenSchemes. Each key should contain an array of objects, with each object having a 'name' and 'url' for the scheme.`,
 });
 
 const recommendGovSchemesFlow = ai.defineFlow(
