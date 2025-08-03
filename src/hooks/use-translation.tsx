@@ -18,64 +18,73 @@ const processTranslationQueue = async () => {
   }
   isProcessingQueue = true;
 
-  // Batch requests by language
   const requestsByLang: { [lang: string]: typeof translationQueue } = {};
-  translationQueue.forEach(item => {
+  const currentQueue = [...translationQueue];
+  translationQueue = [];
+
+  currentQueue.forEach(item => {
     if (!requestsByLang[item.targetLanguage]) {
       requestsByLang[item.targetLanguage] = [];
     }
     requestsByLang[item.targetLanguage].push(item);
   });
-  
-  translationQueue = [];
 
   for (const lang in requestsByLang) {
     const batch = requestsByLang[lang];
-    // Create a single translation request for a batch of unique texts
     const uniqueTexts = [...new Set(batch.map(item => item.originalText))];
     
-    try {
-      // In a real-world scenario, you might batch these into a single API call if the API supports it.
-      // For now, we process them sequentially with a small delay to respect rate limits.
-      for (const text of uniqueTexts) {
-        if (translationsCache[lang]?.[text]) continue; // Already translated by another concurrent process
+    // Filter out texts that are already in the cache for this language
+    const textsToTranslate = uniqueTexts.filter(text => !translationsCache[lang]?.[text]);
 
-        const result = await translateText({ text, targetLanguage: lang });
-        
+    if (textsToTranslate.length > 0) {
+      try {
+        // Batch all unique texts for the current language into a single prompt
+        const combinedText = textsToTranslate.join('\n---\n');
+        const result = await translateText({ text: combinedText, targetLanguage: lang });
+        const translatedTexts = result.translatedText.split('\n---\n');
+
         if (!translationsCache[lang]) {
           translationsCache[lang] = {};
         }
-        translationsCache[lang][text] = result.translatedText;
-        await new Promise(res => setTimeout(res, 200)); // Delay between requests
+
+        textsToTranslate.forEach((originalText, index) => {
+          // Fallback in case the model doesn't return the same number of lines
+          const translated = translatedTexts[index] || originalText;
+          translationsCache[lang][originalText] = translated;
+        });
+
+      } catch (error) {
+        console.error(`Failed to translate batch for language ${lang}:`, error);
+        // On error, reject all promises in this batch
+        batch.forEach(item => item.reject(error));
+        continue; // Move to the next language batch
       }
-
-      // Resolve all promises for this language batch
-      batch.forEach(item => {
-        const translated = translationsCache[lang][item.originalText];
-        if (translated) {
-          item.resolve(translated);
-        } else {
-          // Should not happen, but as a fallback, return original text
-          item.resolve(item.originalText);
-        }
-      });
-
-    } catch (error) {
-      console.error(`Failed to translate batch for language ${lang}:`, error);
-      batch.forEach(item => item.reject(error));
     }
+    
+    // Resolve all promises for this language batch using the (now populated) cache
+    batch.forEach(item => {
+      const translated = translationsCache[lang]?.[item.originalText];
+      if (translated) {
+        item.resolve(translated);
+      } else {
+        // This can happen if the translation failed but wasn't caught, or for an empty string.
+        // Resolve with original text as a fallback.
+        item.resolve(item.originalText);
+      }
+    });
   }
   
   isProcessingQueue = false;
   // If new items were added while processing, run again
   if(translationQueue.length > 0) {
-      setTimeout(processTranslationQueue, 500);
+    setTimeout(processTranslationQueue, 100);
   }
 };
 
+
 const getTranslation = (originalText: string, targetLanguage: string): Promise<string> => {
   return new Promise((resolve, reject) => {
-    if (targetLanguage === 'en') {
+    if (!originalText || targetLanguage === 'en') {
       resolve(originalText);
       return;
     }
@@ -85,22 +94,12 @@ const getTranslation = (originalText: string, targetLanguage: string): Promise<s
       return;
     }
     
-    // Check if the same request is already in the queue
-    if (translationQueue.some(item => item.originalText === originalText && item.targetLanguage === targetLanguage)) {
-       // It's already queued, let the existing promise handle it. We will just wait.
-       const checkInterval = setInterval(() => {
-           if (translationsCache[targetLanguage]?.[originalText]) {
-               clearInterval(checkInterval);
-               resolve(translationsCache[targetLanguage][originalText]);
-           }
-       }, 100);
-       return;
-    }
-
     translationQueue.push({ originalText, targetLanguage, resolve, reject });
     
-    // Debounce queue processing
-    setTimeout(processTranslationQueue, 100);
+    if (!isProcessingQueue) {
+       // Debounce queue processing
+      setTimeout(processTranslationQueue, 100);
+    }
   });
 };
 
@@ -109,18 +108,15 @@ const getTranslation = (originalText: string, targetLanguage: string): Promise<s
 
 export function useTranslation(texts: { [key: string]: string }) {
   const { language } = useLanguage();
-  const [translations, setTranslations] = useState<{ [key: string]: string }>({});
-  const [isTranslating, setIsTranslating] = useState(false);
-
-  // Set initial state from cache or default texts
-  useEffect(() => {
+  const [translations, setTranslations] = useState<{ [key: string]: string }>(() => {
     const initialTranslations: { [key: string]: string } = {};
     for (const key in texts) {
       const originalText = texts[key];
       initialTranslations[key] = translationsCache[language]?.[originalText] || originalText;
     }
-    setTranslations(initialTranslations);
-  }, [language, texts]);
+    return initialTranslations;
+  });
+  const [isTranslating, setIsTranslating] = useState(false);
 
 
   useEffect(() => {
@@ -148,13 +144,11 @@ export function useTranslation(texts: { [key: string]: string }) {
 
       const results = await Promise.all(promises);
       
-      setTranslations(prev => {
-        const newTranslations = { ...prev };
-        results.forEach(({ key, translatedText }) => {
-          newTranslations[key] = translatedText;
-        });
-        return newTranslations;
+      const newTranslations: { [key: string]: string } = {};
+      results.forEach(({ key, translatedText }) => {
+        newTranslations[key] = translatedText;
       });
+      setTranslations(newTranslations);
 
       setIsTranslating(false);
     };
@@ -163,7 +157,7 @@ export function useTranslation(texts: { [key: string]: string }) {
   }, [language, texts]);
 
   const t = useCallback((key: keyof typeof texts): string => {
-    return translations[key] || texts[key];
+    return translations[key] || texts[key] || '';
   }, [translations, texts]);
 
   return { t, isTranslating, currentLanguage: language };

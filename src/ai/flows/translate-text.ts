@@ -13,13 +13,13 @@ import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
 
 const TranslateTextInputSchema = z.object({
-  text: z.string().describe('The text to be translated.'),
+  text: z.string().describe('The text to be translated. This may contain multiple lines separated by "\\n---\\n".'),
   targetLanguage: z.string().describe('The target language for translation (e.g., "hi", "ta").'),
 });
 export type TranslateTextInput = z.infer<typeof TranslateTextInputSchema>;
 
 const TranslateTextOutputSchema = z.object({
-  translatedText: z.string().describe('The translated text.'),
+  translatedText: z.string().describe('The translated text, preserving the "\\n---\\n" separators.'),
 });
 export type TranslateTextOutput = z.infer<typeof TranslateTextOutputSchema>;
 
@@ -36,7 +36,7 @@ const translateTextFlow = ai.defineFlow(
   async ({ text, targetLanguage }) => {
     const { text: translatedText } = await ai.generate({
       model: 'googleai/gemini-2.0-flash',
-      prompt: `Translate the following text to ${targetLanguage}:\n\n"${text}"\n\nReturn only the translated text.`,
+      prompt: `Translate the following text to ${targetLanguage}. The text may contain multiple distinct entries separated by "\\n---\\n". Maintain this separator in your output. Return only the translated text, preserving the separators exactly as they appear in the input.\n\n"${text}"`,
     });
     
     return {
