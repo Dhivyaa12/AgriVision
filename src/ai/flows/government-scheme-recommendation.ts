@@ -13,7 +13,7 @@ import {z} from 'genkit';
 
 const SchemeSchema = z.object({
     name: z.string().describe('The full name of the government scheme.'),
-    url: z.string().url().describe('The official government URL for the scheme.'),
+    url: z.string().describe('The official government URL for the scheme.'),
 });
 
 const RecommendGovSchemesInputSchema = z.object({
