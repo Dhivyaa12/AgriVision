@@ -20,7 +20,7 @@ import { cn } from '@/lib/utils';
 
 const formSchema = z.object({
   state: z.string().min(1, 'Please select a state.'),
-  requirements: z.string().min(10, 'Please describe your requirements.'),
+  requirements: z.string().optional(),
 });
 
 const indianStates = [
@@ -34,8 +34,8 @@ const texts = {
     formDescription: "Tell us your location and needs to find relevant schemes.",
     stateLabel: "State",
     statePlaceholder: "Select your state",
-    requirementsLabel: "Your Requirements",
-    requirementsPlaceholder: "e.g., I need a subsidy for irrigation equipment, or I am a woman farmer looking for financial support.",
+    requirementsLabel: "Your Requirements (Optional)",
+    requirementsPlaceholder: "e.g., I need a subsidy for irrigation equipment, or I am a woman farmer looking for financial support. Leave blank for general schemes.",
     findSchemesButton: "Find Schemes",
     resultTitle: "Recommended Schemes",
     resultDescription: "AI-curated list of schemes for you.",
@@ -70,7 +70,10 @@ export function GovernmentSchemesForm() {
     setResult(null);
     setError(null);
     try {
-      const response = await recommendGovSchemes(values);
+      const response = await recommendGovSchemes({
+        state: values.state,
+        requirements: values.requirements || "general",
+      });
       setResult(response);
     } catch (e) {
       console.error(e);
@@ -103,7 +106,7 @@ export function GovernmentSchemesForm() {
           const audioDataUri = reader.result as string;
           try {
             const { text } = await speechToText({ audioDataUri });
-            form.setValue('requirements', form.getValues('requirements') + text);
+            form.setValue('requirements', (form.getValues('requirements') || '') + text);
           } catch (e) {
             console.error(e);
             setError('Failed to transcribe audio. Please try again.');
@@ -216,7 +219,7 @@ export function GovernmentSchemesForm() {
                 </AccordionTrigger>
                 <AccordionContent>
                   <ul className="list-disc pl-6 space-y-1 text-muted-foreground">
-                    {result.centralSchemes.map((scheme, index) => <li key={index}>{scheme}</li>)}
+                    {result.centralSchemes.length > 0 ? result.centralSchemes.map((scheme, index) => <li key={index}>{scheme}</li>) : <li>{t('noSchemes')}</li>}
                   </ul>
                 </AccordionContent>
               </AccordionItem>
@@ -229,7 +232,7 @@ export function GovernmentSchemesForm() {
                 </AccordionTrigger>
                 <AccordionContent>
                   <ul className="list-disc pl-6 space-y-1 text-muted-foreground">
-                    {result.stateSchemes.map((scheme, index) => <li key={index}>{scheme}</li>)}
+                    {result.stateSchemes.length > 0 ? result.stateSchemes.map((scheme, index) => <li key={index}>{scheme}</li>) : <li>{t('noSchemes')}</li>}
                   </ul>
                 </AccordionContent>
               </AccordionItem>

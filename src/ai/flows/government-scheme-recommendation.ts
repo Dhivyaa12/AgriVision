@@ -1,3 +1,4 @@
+
 'use server';
 /**
  * @fileOverview A government scheme recommendation AI agent.
@@ -14,8 +15,9 @@ const RecommendGovSchemesInputSchema = z.object({
   state: z.string().describe('The state for which to find government schemes.'),
   requirements: z
     .string()
+    .optional()
     .describe(
-      'The requirements of the user, such as women-focused schemes or irrigation support.'
+      'The requirements of the user, such as women-focused schemes or irrigation support. If not provided, general schemes should be recommended.'
     ),
 });
 export type RecommendGovSchemesInput = z.infer<typeof RecommendGovSchemesInputSchema>;
@@ -44,9 +46,11 @@ const prompt = ai.definePrompt({
 You will use the state and requirements provided to recommend relevant schemes.
 
 State: {{{state}}}
+{{#if requirements}}
 Requirements: {{{requirements}}}
+{{/if}}
 
-Recommend relevant Central Government Schemes, applicable State Government Schemes, and Women-specific agricultural schemes.
+Recommend relevant Central Government Schemes, applicable State Government Schemes, and Women-specific agricultural schemes. If no specific requirements are given, provide a list of general, popular, and impactful schemes for the given state.
 
 Format your output as a JSON object with keys for centralSchemes, stateSchemes, and womenSchemes. Each key should contain a list of schemes.`,
 });
