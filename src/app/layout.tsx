@@ -50,8 +50,18 @@ function AppLayout({ children }: { children: React.ReactNode }) {
       <Sidebar>
         <SidebarHeader>
           <div className="flex items-center gap-2">
-            <Leaf className="size-8 text-primary" />
-            <h1 className="text-2xl font-headline font-bold text-primary">AgriAssist</h1>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              className="size-10 text-primary"
+              fill="currentColor"
+            >
+              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zM8.83 16.17l-1.41-1.41L12 10.17l4.59 4.59-1.41 1.41L12 13l-3.17 3.17zM12 4c2.21 0 4 1.79 4 4s-1.79 4-4 4-4-1.79-4-4 1.79-4 4-4z"/>
+            </svg>
+            <div className="flex flex-col">
+              <h1 className="text-2xl font-headline font-bold text-primary">AgriVision</h1>
+              <p className="text-xs text-muted-foreground">Smarter Farming</p>
+            </div>
           </div>
         </SidebarHeader>
         <SidebarContent>
@@ -144,7 +154,7 @@ export default function RootLayout({
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=PT+Sans:wght@400;700&display=swap" rel="stylesheet" />
-        <title>AgriAssist</title>
+        <title>AgriVision</title>
         <meta name="description" content="An AI-Powered Agricultural Assistant to help farmers." />
       </head>
       <body className={cn('font-body antialiased')}>

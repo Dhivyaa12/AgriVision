@@ -1,8 +1,8 @@
 
 'use client';
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ScanSearch, Sprout, LineChart, Landmark, ArrowRight } from "lucide-react";
+import { ScanSearch, Sprout, LineChart, Landmark, ArrowRight, PlayCircle } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import { useTranslation } from "@/hooks/use-translation";
@@ -39,8 +39,10 @@ const featuresData = {
 };
 
 const texts = {
-  welcome: "Welcome to AgriAssist",
+  welcome: "Welcome to AgriVision",
   tagline: "Your AI-powered assistant for smarter farming.",
+  videoTitle: "Watch: The Future of Farming",
+  videoDescription: "See how AI is transforming agriculture and empowering farmers across the globe. Learn about precision farming, automated systems, and data-driven decisions that lead to better yields and a sustainable future.",
   ...Object.keys(featuresData).reduce((acc, key) => {
     acc[`${key}_title`] = featuresData[key as keyof typeof featuresData].title;
     acc[`${key}_description`] = featuresData[key as keyof typeof featuresData].description;
@@ -70,14 +72,14 @@ export default function DashboardPage() {
         <p className="text-muted-foreground">{t('tagline')}</p>
       </div>
 
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-2">
+      <div className="grid gap-6 md:grid-cols-2">
         {features.map((feature) => {
           const Icon = feature.icon;
           return (
-            <Card key={feature.title} className="flex flex-col">
+            <Card key={feature.title} className="flex flex-col group transition-all duration-300 hover:shadow-lg hover:border-primary/50">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-xl font-headline font-semibold">{feature.title}</CardTitle>
-                <Icon className="h-6 w-6 text-muted-foreground" />
+                <Icon className="h-6 w-6 text-muted-foreground transition-transform duration-300 group-hover:scale-110" />
               </CardHeader>
               <CardContent className="flex flex-col flex-grow">
                 <p className="text-muted-foreground flex-grow">{feature.description}</p>
@@ -92,6 +94,47 @@ export default function DashboardPage() {
           );
         })}
       </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
+        <Card className="lg:col-span-3">
+            <CardHeader>
+                <CardTitle className="font-headline text-xl">{t('videoTitle')}</CardTitle>
+                <CardDescription>{t('videoDescription')}</CardDescription>
+            </CardHeader>
+            <CardContent>
+                <div className="aspect-video rounded-lg overflow-hidden relative group">
+                    <video
+                        className="w-full h-full object-cover"
+                        poster="https://placehold.co/1280x720.png"
+                        controls
+                        data-ai-hint="agriculture technology"
+                    >
+                        <source src="https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4" type="video/mp4" />
+                        Your browser does not support the video tag.
+                    </video>
+                    <div className="absolute inset-0 bg-black/20 flex items-center justify-center opacity-100 group-hover:opacity-0 transition-opacity duration-300 pointer-events-none">
+                        <PlayCircle className="w-16 h-16 text-white/80" />
+                    </div>
+                </div>
+            </CardContent>
+        </Card>
+         <Card className="lg:col-span-2 relative overflow-hidden group">
+            <Image
+              src="https://placehold.co/600x800.png"
+              alt="Farmer in field"
+              layout="fill"
+              objectFit="cover"
+              className="transition-transform duration-500 group-hover:scale-105"
+              data-ai-hint="farmer field"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent" />
+            <div className="absolute bottom-0 left-0 p-6">
+                <h3 className="text-2xl font-headline font-bold text-white">Empowering the pillars of our nation.</h3>
+                <p className="text-white/90 mt-2">Bringing cutting-edge technology to the heart of agriculture.</p>
+            </div>
+        </Card>
+      </div>
+
     </div>
   );
 }
