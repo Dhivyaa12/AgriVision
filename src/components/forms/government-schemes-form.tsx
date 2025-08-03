@@ -103,10 +103,10 @@ export function GovernmentSchemesForm() {
           const audioDataUri = reader.result as string;
           try {
             const { text } = await speechToText({ audioDataUri });
-            form.setValue('requirements', text);
+            form.setValue('requirements', form.getValues('requirements') + text);
           } catch (e) {
             console.error(e);
-            setError('Failed to transcribe audio.');
+            setError('Failed to transcribe audio. Please try again.');
           } finally {
             setRecordingLoading(false);
           }
