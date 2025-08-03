@@ -106,10 +106,10 @@ const getTranslation = (originalText: string, targetLanguage: string): Promise<s
 
 // --- The React Hook ---
 
-export function useTranslation(texts: { [key: string]: string }) {
+export function useTranslation<T extends { [key: string]: string }>(texts: T) {
   const { language } = useLanguage();
-  const [translations, setTranslations] = useState<{ [key: string]: string }>(() => {
-    const initialTranslations: { [key: string]: string } = {};
+  const [translations, setTranslations] = useState<{ [K in keyof T]: string }>(() => {
+    const initialTranslations: any = {};
     for (const key in texts) {
       const originalText = texts[key];
       initialTranslations[key] = translationsCache[language]?.[originalText] || originalText;
@@ -120,8 +120,11 @@ export function useTranslation(texts: { [key: string]: string }) {
 
 
   useEffect(() => {
+    // Create a stable reference to the texts object for the effect dependency array.
+    const textsString = JSON.stringify(texts);
+
     if (language === 'en') {
-      const englishTexts: { [key: string]: string } = {};
+      const englishTexts: any = {};
        for (const key in texts) {
           englishTexts[key] = texts[key];
       }
@@ -144,7 +147,7 @@ export function useTranslation(texts: { [key: string]: string }) {
 
       const results = await Promise.all(promises);
       
-      const newTranslations: { [key: string]: string } = {};
+      const newTranslations: any = {};
       results.forEach(({ key, translatedText }) => {
         newTranslations[key] = translatedText;
       });
@@ -154,9 +157,10 @@ export function useTranslation(texts: { [key: string]: string }) {
     };
 
     translateAll();
-  }, [language, texts]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [language, JSON.stringify(texts)]);
 
-  const t = useCallback((key: keyof typeof texts): string => {
+  const t = useCallback((key: keyof T): string => {
     return translations[key] || texts[key] || '';
   }, [translations, texts]);
 
