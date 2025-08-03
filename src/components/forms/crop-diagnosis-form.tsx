@@ -23,7 +23,7 @@ import { useTranslation } from '@/hooks/use-translation';
 
 const formSchema = z.object({
   photo: z.any().refine((file) => file?.[0], 'Please upload an image.'),
-  description: z.string().min(10, 'Please provide a detailed description.'),
+  description: z.string().optional(),
 });
 
 const languages = [
@@ -42,7 +42,7 @@ const texts = {
     uploadPrompt: "Click to upload",
     uploadOrDrag: "or drag and drop",
     fileTypes: "PNG, JPG or JPEG",
-    symptomsLabel: "Description of Symptoms",
+    symptomsLabel: "Description of Symptoms (Optional)",
     symptomsPlaceholder: "e.g., Yellow spots on leaves, wilting stems, etc. You can also use the microphone to record your description.",
     diagnoseButton: "Diagnose",
     resultTitle: "Diagnosis Result",
@@ -191,7 +191,7 @@ export function CropDiagnosisForm() {
             form.setValue('description', text);
           } catch (e) {
             console.error(e);
-            setError('Failed to transcribe audio.');
+            setError('Failed to transcribe audio. Please try again.');
           } finally {
             setRecordingLoading(false);
           }

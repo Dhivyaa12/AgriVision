@@ -16,7 +16,7 @@ const DiagnoseCropInputSchema = z.object({
     .describe(
       "A photo of the crop, as a data URI that must include a MIME type and use Base64 encoding. Expected format: 'data:<mimetype>;base64,<encoded_data>'."
     ),
-  description: z.string().describe('The description of the crop issue.'),
+  description: z.string().optional().describe('An optional description of the crop issue.'),
 });
 export type DiagnoseCropInput = z.infer<typeof DiagnoseCropInputSchema>;
 
@@ -38,8 +38,10 @@ const prompt = ai.definePrompt({
   output: {schema: DiagnoseCropOutputSchema},
   prompt: `You are an expert in diagnosing crop diseases. Analyze the provided information to identify the disease, its possible causes, recommend remedies, and suggest preventive measures.
 
-Description: {{{description}}}
-Photo: {{media url=photoDataUri}}`,
+{{#if description}}Description: {{{description}}}{{/if}}
+Photo: {{media url=photoDataUri}}
+
+If no description is provided, rely solely on the image for your analysis.`,
 });
 
 const diagnoseCropFlow = ai.defineFlow(
