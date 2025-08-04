@@ -34,9 +34,14 @@ const translateTextFlow = ai.defineFlow(
     outputSchema: TranslateTextOutputSchema,
   },
   async ({ text, targetLanguage }) => {
+    // Handle cases where the text might be empty or just separators
+    if (!text.trim() || text.trim() === '---') {
+      return { translatedText: text };
+    }
+
     const { text: translatedText } = await ai.generate({
       model: 'googleai/gemini-2.0-flash',
-      prompt: `Translate the following text to ${targetLanguage}. The text may contain multiple distinct entries separated by "\\n---\\n". Maintain this separator in your output. Return only the translated text, preserving the separators exactly as they appear in the input.\n\n"${text}"`,
+      prompt: `Translate the following text to the language with code '${targetLanguage}'. The text may contain multiple distinct entries separated by "\\n---\\n". Maintain this separator in your output. Return only the translated text, preserving the separators exactly as they appear in the input.\n\nText to translate: "${text}"`,
     });
     
     return {
