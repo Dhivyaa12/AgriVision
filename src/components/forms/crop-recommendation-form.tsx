@@ -107,9 +107,13 @@ export function CropRecommendationForm() {
       const response = await recommendBestCrops(values);
       setResult(response);
       setTranslatedResult(response);
-    } catch (e) {
+    } catch (e: any) {
       console.error(e);
-      setError('An error occurred while getting recommendations.');
+       if (e.message?.includes('429')) {
+          setError(t('quotaError'));
+      } else {
+          setError('An error occurred while getting recommendations.');
+      }
     } finally {
       setLoading(false);
     }
@@ -330,3 +334,5 @@ export function CropRecommendationForm() {
     </div>
   );
 }
+
+    
