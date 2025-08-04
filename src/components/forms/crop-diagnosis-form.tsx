@@ -11,7 +11,7 @@ import { Button } from '@/components/ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Loader2, UploadCloud, Leaf, AlertTriangle, Bug, FlaskConical, ShieldCheck, Volume2, Mic, MicOff } from 'lucide-react';
+import { Loader2, UploadCloud, Leaf, Bug, FlaskConical, ShieldCheck, Volume2, Mic, MicOff } from 'lucide-react';
 import { diagnoseCrop, type DiagnoseCropOutput } from '@/ai/flows/crop-diagnosis';
 import { textToSpeech } from '@/ai/flows/text-to-speech';
 import { speechToText } from '@/ai/flows/speech-to-text';
@@ -19,6 +19,7 @@ import { cn } from '@/lib/utils';
 import { useLanguage } from '@/hooks/use-language';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useTranslation } from '@/hooks/use-translation';
+import { translateText } from '@/ai/flows/translate-text';
 
 
 const formSchema = z.object({
@@ -59,8 +60,10 @@ const texts = {
 
 export function CropDiagnosisForm() {
   const [result, setResult] = useState<DiagnoseCropOutput | null>(null);
+  const [translatedResult, setTranslatedResult] = useState<DiagnoseCropOutput | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [translationLoading, setTranslationLoading] = useState(false);
   const [preview, setPreview] = useState<string | null>(null);
   const [audioDataUri, setAudioDataUri] = useState<string | null>(null);
   const [audioLoading, setAudioLoading] = useState(false);
@@ -78,6 +81,13 @@ export function CropDiagnosisForm() {
   useEffect(() => {
     setTtsLanguage(language);
   }, [language]);
+
+  useEffect(() => {
+    if (result && ttsLanguage) {
+      translateResults(ttsLanguage);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [ttsLanguage, result]);
 
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -101,6 +111,7 @@ export function CropDiagnosisForm() {
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     setLoading(true);
     setResult(null);
+    setTranslatedResult(null);
     setError(null);
     setAudioDataUri(null);
 
@@ -116,6 +127,7 @@ export function CropDiagnosisForm() {
               description: values.description,
             });
             setResult(response);
+            setTranslatedResult(response);
         } catch(e: any) {
             if (e.message?.includes('429')) {
                 setError(t('quotaError'));
@@ -139,17 +151,57 @@ export function CropDiagnosisForm() {
     }
   };
 
-  const handleListen = async () => {
+  const translateResults = async (targetLanguage: string) => {
     if (!result) return;
+
+    if (targetLanguage === 'en') {
+        setTranslatedResult(result);
+        return;
+    }
+
+    setTranslationLoading(true);
+    try {
+        const textsToTranslate = [
+            result.diseaseName,
+            result.possibleCauses,
+            result.recommendedRemedies,
+            result.preventiveMeasures,
+        ];
+        const combinedText = textsToTranslate.join('\n---\n');
+        const translationResponse = await translateText({ text: combinedText, targetLanguage });
+        const translatedParts = translationResponse.translatedText.split('\n---\n');
+
+        setTranslatedResult({
+            diseaseName: translatedParts[0] || result.diseaseName,
+            possibleCauses: translatedParts[1] || result.possibleCauses,
+            recommendedRemedies: translatedParts[2] || result.recommendedRemedies,
+            preventiveMeasures: translatedParts[3] || result.preventiveMeasures,
+        });
+
+    } catch (e: any) {
+        console.error(e);
+        if (e.message?.includes('429')) {
+            setError(t('quotaError'));
+        } else {
+            setError('An error occurred during translation.');
+        }
+        setTranslatedResult(result); // Fallback to original
+    } finally {
+        setTranslationLoading(false);
+    }
+  };
+
+  const handleListen = async () => {
+    if (!translatedResult) return;
     setAudioLoading(true);
     setAudioDataUri(null);
     setError(null);
     try {
       const textToRead = `
-        Disease: ${result.diseaseName}.
-        Possible Causes: ${result.possibleCauses}.
-        Recommended Remedies: ${result.recommendedRemedies}.
-        Preventive Measures: ${result.preventiveMeasures}.
+        Disease: ${translatedResult.diseaseName}.
+        Possible Causes: ${translatedResult.possibleCauses}.
+        Recommended Remedies: ${translatedResult.recommendedRemedies}.
+        Preventive Measures: ${translatedResult.preventiveMeasures}.
       `;
       const response = await textToSpeech({ text: textToRead, language: ttsLanguage });
       setAudioDataUri(response.audioDataUri);
@@ -312,7 +364,7 @@ export function CropDiagnosisForm() {
                     ))}
                   </SelectContent>
                 </Select>
-                <Button variant="outline" size="icon" onClick={handleListen} disabled={audioLoading} title={t('listenButton')}>
+                <Button variant="outline" size="icon" onClick={handleListen} disabled={audioLoading || translationLoading} title={t('listenButton')}>
                   {audioLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Volume2 className="h-4 w-4" />}
                   <span className="sr-only">{t('listenButton')}</span>
                 </Button>
@@ -321,7 +373,7 @@ export function CropDiagnosisForm() {
           </div>
         </CardHeader>
         <CardContent>
-          {loading && (
+          {(loading || translationLoading) && (
             <div className="flex justify-center items-center h-full">
               <Loader2 className="h-8 w-8 animate-spin text-primary" />
             </div>
@@ -337,14 +389,14 @@ export function CropDiagnosisForm() {
             </div>
           )}
 
-          {result && (
+          {translatedResult && !loading && !translationLoading && (
             <div className="space-y-6">
               <div className="flex items-center gap-4">
                 <div className="p-3 bg-primary/10 rounded-full">
                   <Leaf className="h-6 w-6 text-primary" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-semibold">{result.diseaseName}</h3>
+                  <h3 className="text-lg font-semibold">{translatedResult.diseaseName}</h3>
                   <p className="text-sm text-muted-foreground">{t('disease')}</p>
                 </div>
               </div>
@@ -353,21 +405,21 @@ export function CropDiagnosisForm() {
                   <Bug className="h-5 w-5 mt-1 text-accent flex-shrink-0" />
                   <div>
                     <h4 className="font-semibold">{t('causes')}</h4>
-                    <p className="text-muted-foreground">{result.possibleCauses}</p>
+                    <p className="text-muted-foreground">{translatedResult.possibleCauses}</p>
                   </div>
                 </div>
                 <div className="flex gap-4">
                   <FlaskConical className="h-5 w-5 mt-1 text-accent flex-shrink-0" />
                   <div>
                     <h4 className="font-semibold">{t('remedies')}</h4>
-                    <p className="text-muted-foreground">{result.recommendedRemedies}</p>
+                    <p className="text-muted-foreground">{translatedResult.recommendedRemedies}</p>
                   </div>
                 </div>
                 <div className="flex gap-4">
                   <ShieldCheck className="h-5 w-5 mt-1 text-accent flex-shrink-0" />
                   <div>
                     <h4 className="font-semibold">{t('prevention')}</h4>
-                    <p className="text-muted-foreground">{result.preventiveMeasures}</p>
+                    <p className="text-muted-foreground">{translatedResult.preventiveMeasures}</p>
                   </div>
                 </div>
               </div>
@@ -383,3 +435,5 @@ export function CropDiagnosisForm() {
     </div>
   );
 }
+
+    
