@@ -1,6 +1,6 @@
 
 'use client';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, use } from 'react';
 import { PageHeader, PageHeaderHeading, PageHeaderDescription } from '@/components/page-header';
 import { MarketWatchTable } from '@/components/market-watch-table';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -53,7 +53,7 @@ export default function StateMarketWatchPage({ params }: { params: { state: stri
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const { t } = useTranslation(texts);
-  const stateName = decodeURIComponent(params.state);
+  const stateName = decodeURIComponent(use(params).state);
 
   useEffect(() => {
     async function fetchData() {
