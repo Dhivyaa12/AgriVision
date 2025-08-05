@@ -38,7 +38,7 @@ async function fetchAllMarketData(limit: number = 2000): Promise<MarketData[]> {
 }
 
 const MarketPricePredictionInputSchema = z.object({
-  commodity: z.string().describe('The name of the commodity to predict the price for.'),
+  commodity: z.string().describe('A description from the user about the commodity they want a price prediction for. This could be a simple name like "Paddy" or a more descriptive sentence like "I want to know the price for high-quality wheat in Punjab".'),
 });
 export type MarketPricePredictionInput = z.infer<typeof MarketPricePredictionInputSchema>;
 
@@ -77,25 +77,57 @@ Historical Market Data (JSON):
 Based on the provided data, perform a brief analysis of the price trend and then provide a predicted price range for the commodity for the near future (e.g., next few weeks). Consider factors like price volatility, and recent min/max/modal prices in your analysis.`,
 });
 
+const commodityIdentifierPrompt = ai.definePrompt({
+    name: 'commodityIdentifierPrompt',
+    input: { schema: z.object({
+        description: z.string(),
+        commoditiesList: z.array(z.string()),
+    })},
+    output: { schema: z.object({ commodity: z.string() }) },
+    prompt: `From the user's description, identify the single most likely commodity they are asking about.
+    
+    User Description: "{{{description}}}"
+
+    Here is a list of available commodities from the market data:
+    {{#each commoditiesList}}
+    - {{{this}}}
+    {{/each}}
+    
+    Respond with only the name of the most relevant commodity from the list.`,
+});
+
 const predictMarketPriceFlow = ai.defineFlow(
   {
     name: 'predictMarketPriceFlow',
     inputSchema: MarketPricePredictionInputSchema,
     outputSchema: MarketPricePredictionOutputSchema,
   },
-  async ({ commodity }) => {
+  async ({ commodity: description }) => {
     const allData = await fetchAllMarketData();
-    const commodityData = allData.filter(item => item.commodity.toLowerCase() === commodity.toLowerCase());
+    const uniqueCommodities = [...new Set(allData.map(item => item.commodity))];
+
+    const { output: identifiedCommodity } = await commodityIdentifierPrompt({
+        description,
+        commoditiesList: uniqueCommodities.slice(0, 200), // Provide a sample to the model
+    });
+
+    if (!identifiedCommodity || !identifiedCommodity.commodity) {
+        throw new Error("Could not identify commodity from description.");
+    }
+    
+    const commodityToAnalyze = identifiedCommodity.commodity;
+
+    const commodityData = allData.filter(item => item.commodity.toLowerCase() === commodityToAnalyze.toLowerCase());
 
     if (commodityData.length === 0) {
-      throw new Error(`No market data found for commodity: ${commodity}`);
+      throw new Error(`No market data found for commodity: ${commodityToAnalyze}`);
     }
     
     // Provide a sample of the data to the model to avoid exceeding token limits
     const dataSample = commodityData.slice(0, 100);
 
     const {output} = await prompt({
-        commodity,
+        commodity: commodityToAnalyze,
         marketData: JSON.stringify(dataSample, null, 2),
     });
     return output!;

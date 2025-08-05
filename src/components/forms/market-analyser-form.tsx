@@ -8,20 +8,20 @@ import * as z from 'zod';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 import { Loader2, TrendingUp, LineChart } from 'lucide-react';
 import { predictMarketPrice, type MarketPricePredictionOutput } from '@/ai/flows/market-price-prediction';
 import { useTranslation } from '@/hooks/use-translation';
 
 const formSchema = z.object({
-  commodity: z.string().min(2, 'Please enter a commodity name.'),
+  description: z.string().min(10, 'Please enter a more detailed description.'),
 });
 
 const texts = {
     formTitle: "Predict Commodity Price",
-    formDescription: "Enter the name of a commodity to get its future price prediction.",
-    commodityLabel: "Commodity Name",
-    commodityPlaceholder: "e.g., Paddy, Wheat, Cotton",
+    formDescription: "Describe the commodity you want a price prediction for.",
+    commodityLabel: "Product Description",
+    commodityPlaceholder: "e.g., 'I want to know the price for long-staple cotton from Gujarat.'",
     predictButton: "Predict Price",
     resultTitle: "Price Prediction Analysis",
     resultDescription: "AI-powered market analysis and price forecast.",
@@ -41,7 +41,7 @@ export function MarketAnalyserForm() {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      commodity: '',
+      description: '',
     },
   });
 
@@ -50,7 +50,7 @@ export function MarketAnalyserForm() {
     setResult(null);
     setError(null);
     try {
-      const response = await predictMarketPrice(values);
+      const response = await predictMarketPrice({ commodity: values.description });
       setResult(response);
     } catch (e: any) {
       console.error(e);
@@ -78,12 +78,12 @@ export function MarketAnalyserForm() {
             <CardContent>
               <FormField
                 control={form.control}
-                name="commodity"
+                name="description"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>{t('commodityLabel')}</FormLabel>
                     <FormControl>
-                      <Input placeholder={t('commodityPlaceholder')} {...field} />
+                      <Textarea placeholder={t('commodityPlaceholder')} {...field} rows={4} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
