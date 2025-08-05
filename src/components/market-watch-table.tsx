@@ -33,10 +33,14 @@ type MarketData = {
   modal_price: string;
 };
 
+interface MarketWatchTableProps {
+    data: MarketData[];
+}
+
 const texts = {
     filterCommodities: "Filter commodities...",
-    filterState: "Filter by state...",
-    allStates: "All States",
+    filterDistrict: "Filter by district...",
+    allDistricts: "All Districts",
     noResults: "No results.",
     previous: "Previous",
     next: "Next",
@@ -106,11 +110,10 @@ export function MarketWatchTable({ data }: MarketWatchTableProps) {
     }
   });
 
-  const indianStates = [
-    "Andhra Pradesh", "Arunachal Pradesh", "Assam", "Bihar", "Chhattisgarh", "Goa", "Gujarat", "Haryana", "Himachal Pradesh",
-    "Jharkhand", "Karnataka", "Kerala", "Madhya Pradesh", "Maharashtra", "Manipur", "Meghalaya", "Mizoram", "Nagaland",
-    "Odisha", "Punjab", "Rajasthan", "Sikkim", "Tamil Nadu", "Telangana", "Tripura", "Uttar Pradesh", "Uttarakhand", "West Bengal", "National Capital Territory of Delhi"
-  ];
+  const districts = React.useMemo(() => {
+    const uniqueDistricts = [...new Set(data.map(item => item.district))];
+    return uniqueDistricts.sort();
+  }, [data]);
 
   return (
     <div>
@@ -122,17 +125,17 @@ export function MarketWatchTable({ data }: MarketWatchTableProps) {
           className="max-w-xs"
         />
         <Select
-          value={(table.getColumn('state')?.getFilterValue() as string) ?? ''}
-          onValueChange={(value) => table.getColumn('state')?.setFilterValue(value === 'all' ? '' : value)}
+          value={(table.getColumn('district')?.getFilterValue() as string) ?? ''}
+          onValueChange={(value) => table.getColumn('district')?.setFilterValue(value === 'all' ? '' : value)}
         >
           <SelectTrigger className="max-w-xs w-full">
-            <SelectValue placeholder={t('filterState')} />
+            <SelectValue placeholder={t('filterDistrict')} />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">{t('allStates')}</SelectItem>
-            {indianStates.map((state) => (
-              <SelectItem key={state} value={state}>
-                {state}
+            <SelectItem value="all">{t('allDistricts')}</SelectItem>
+            {districts.map((district) => (
+              <SelectItem key={district} value={district}>
+                {district}
               </SelectItem>
             ))}
           </SelectContent>
