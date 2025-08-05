@@ -9,6 +9,7 @@ import {
   LineChart,
   Settings,
   LifeBuoy,
+  TrendingUp,
 } from "lucide-react"
 
 import './globals.css';
@@ -38,6 +39,7 @@ const texts = {
   cropDiagnosis: "Crop Diagnosis",
   cropRecommendation: "Crop Recommendation",
   marketWatch: "Market Watch",
+  marketAnalyser: "Market Analyser",
   governmentSchemes: "Government Schemes",
   support: "Support",
   settings: "Settings",
@@ -95,6 +97,14 @@ function AppLayout({ children }: { children: React.ReactNode }) {
                 <SidebarMenuButton tooltip={t('marketWatch')}>
                   <LineChart />
                   <span>{t('marketWatch')}</span>
+                </SidebarMenuButton>
+              </Link>
+            </SidebarMenuItem>
+             <SidebarMenuItem>
+              <Link href="/market-analyser" passHref>
+                <SidebarMenuButton tooltip={t('marketAnalyser')}>
+                  <TrendingUp />
+                  <span>{t('marketAnalyser')}</span>
                 </SidebarMenuButton>
               </Link>
             </SidebarMenuItem>

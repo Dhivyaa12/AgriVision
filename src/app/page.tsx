@@ -2,7 +2,7 @@
 'use client';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ScanSearch, Sprout, LineChart, Landmark, ArrowRight } from "lucide-react";
+import { ScanSearch, Sprout, LineChart, Landmark, ArrowRight, TrendingUp } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import { useTranslation } from "@/hooks/use-translation";
@@ -28,6 +28,13 @@ const featuresData = {
     description: "Stay updated with the latest Mandi prices for various crops and make informed selling decisions.",
     href: "/market-watch",
     cta: "View Prices",
+  },
+  marketAnalyser: {
+    icon: TrendingUp,
+    title: "Market Analyser",
+    description: "Predict future commodity prices based on historical market data and trends.",
+    href: "/market-analyser",
+    cta: "Analyse Prices",
   },
   governmentSchemes: {
     icon: Landmark,
@@ -71,7 +78,7 @@ export default function DashboardPage() {
         <p className="text-muted-foreground">{t('tagline')}</p>
       </div>
 
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-2">
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         {features.map((feature) => {
           const Icon = feature.icon;
           return (

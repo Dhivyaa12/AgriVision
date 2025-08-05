@@ -7,3 +7,4 @@ import '@/ai/flows/crop-recommendation.ts';
 import '@/ai/flows/text-to-speech.ts';
 import '@/ai/flows/speech-to-text.ts';
 import '@/ai/flows/translate-text.ts';
+import '@/ai/flows/market-price-prediction.ts';
