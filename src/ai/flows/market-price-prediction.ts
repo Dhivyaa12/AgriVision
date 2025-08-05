@@ -10,10 +10,7 @@
 
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
-import type {RequestInfo, RequestInit} from 'node-fetch';
-
-const fetch = (url: RequestInfo, init?: RequestInit) =>
-  import('node-fetch').then(({default: fetch}) => fetch(url, init));
+import fetch from 'node-fetch';
 
 
 export type MarketData = {
