@@ -10,6 +10,11 @@
 
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
+import type {RequestInfo, RequestInit} from 'node-fetch';
+
+const fetch = (url: RequestInfo, init?: RequestInit) =>
+  import('node-fetch').then(({default: fetch}) => fetch(url, init));
+
 
 export type MarketData = {
   state: string;
@@ -32,7 +37,7 @@ async function fetchAllMarketData(limit: number = 2000): Promise<MarketData[]> {
     throw new Error('Failed to fetch market data.');
   }
   const result = await response.json();
-  return result.records;
+  return (result as any).records;
 }
 
 const MarketPricePredictionInputSchema = z.object({
