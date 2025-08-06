@@ -5,7 +5,7 @@
  *
  * - predictMarketPrice - A function that handles the price prediction process.
  * - MarketPricePredictionInput - The input type for the predictMarketPrice function.
- * - MarketPricePredictionOutput - The return type for the predictMarketPrice function.
+ * - MarketPricePredictionOutput - The return type for the predictMarket_price function.
  */
 
 import {ai} from '@/ai/genkit';
@@ -62,13 +62,13 @@ export async function predictMarketPrice(
 }
 
 
-const prompt = ai.definePrompt({
+const predictMarketPricePrompt = ai.definePrompt({
   name: 'predictMarketPricePrompt',
   input: {schema: z.object({
     commodity: z.string(),
     marketData: z.string(),
   })},
-  output: {schema: MarketPricePredictionOutputSchema},
+  output: { format: 'text' }, // Ask for simple text output
   prompt: `You are an expert market analyst specializing in Indian agricultural commodities.
   
 You have been provided with a JSON dataset of recent market prices for a specific commodity. Your task is to analyze this historical data, predict the future price trend for the next 4 weeks, and provide a suggestion to the farmer.
@@ -84,8 +84,39 @@ Historical Market Data (JSON):
 2.  **4-Week Price Forecast**: Based on your analysis, provide a week-by-week predicted modal price for the commodity for the upcoming four weeks. The price should be a single number (e.g., 1500), not a range.
 3.  **Suggestion**: Based on your forecast, provide a short, actionable suggestion to the farmer (e.g., "Prices are trending up, consider holding your stock for a couple of weeks for a better return." or "Market seems stable, selling now would be a safe choice.").
 
-Format your response as a JSON object with 'analysis', 'weeklyForecast', and 'suggestion' keys. The 'weeklyForecast' should be an array of objects, each with 'week' and 'price' properties. For example: "weeklyForecast": [{"week": "Week 1", "price": 1500}, {"week": "Week 2", "price": 1550}]`,
+Respond in a clear, narrative format. Do not use JSON.`,
 });
+
+const jsonOutputFormatterPrompt = ai.definePrompt({
+    name: 'jsonOutputFormatterPrompt',
+    input: { schema: z.object({ text: z.string() }) },
+    output: { schema: MarketPricePredictionOutputSchema },
+    prompt: `Convert the following text into a structured JSON object.
+
+The JSON object must have three keys: 'analysis', 'weeklyForecast', and 'suggestion'.
+- 'analysis' should be a string containing the market analysis.
+- 'weeklyForecast' should be an array of objects. Each object must have a 'week' (string) and a 'price' (number).
+- 'suggestion' should be a string containing the actionable suggestion.
+
+Example JSON output:
+{
+  "analysis": "The analysis of the market...",
+  "weeklyForecast": [
+    { "week": "Week 1", "price": 1500 },
+    { "week": "Week 2", "price": 1550 },
+    { "week": "Week 3", "price": 1520 },
+    { "week": "Week 4", "price": 1580 }
+  ],
+  "suggestion": "It is a good time to sell."
+}
+
+Text to convert:
+---
+{{{text}}}
+---
+`,
+});
+
 
 const commodityIdentifierPrompt = ai.definePrompt({
     name: 'commodityIdentifierPrompt',
@@ -114,13 +145,12 @@ const predictMarketPriceFlow = ai.defineFlow(
     outputSchema: MarketPricePredictionOutputSchema,
   },
   async ({ commodity: description }) => {
-    // Fetch a large, but not full, dataset to get a comprehensive list of commodities
     const allData = await fetchAllMarketData(5000); 
     const uniqueCommodities = [...new Set(allData.map(item => item.commodity))];
 
     const { output: identifiedCommodity } = await commodityIdentifierPrompt({
         description,
-        commoditiesList: uniqueCommodities.slice(0, 400), // Give a larger sample to the model
+        commoditiesList: uniqueCommodities.slice(0, 400),
     });
 
     if (!identifiedCommodity || !identifiedCommodity.commodity || identifiedCommodity.commodity === 'Unknown') {
@@ -129,20 +159,23 @@ const predictMarketPriceFlow = ai.defineFlow(
     
     const commodityToAnalyze = identifiedCommodity.commodity;
 
-    // Now filter the fetched data for the identified commodity
     const commodityData = allData.filter(item => item.commodity.toLowerCase() === commodityToAnalyze.toLowerCase());
 
     if (commodityData.length === 0) {
       throw new Error(`No market data found for commodity: ${commodityToAnalyze}. It might be a rare commodity or the data is not available in the recent records.`);
     }
     
-    // Provide a sample of the data to the model to avoid exceeding token limits
     const dataSample = commodityData.slice(0, 100);
 
-    const {output} = await prompt({
+    // Step 1: Get the analysis as plain text.
+    const { text } = await predictMarketPricePrompt({
         commodity: commodityToAnalyze,
         marketData: JSON.stringify(dataSample, null, 2),
     });
-    return output!;
+
+    // Step 2: Convert the text to structured JSON.
+    const { output: structuredOutput } = await jsonOutputFormatterPrompt({ text });
+    
+    return structuredOutput!;
   }
 );
