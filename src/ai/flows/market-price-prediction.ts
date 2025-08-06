@@ -84,7 +84,7 @@ Historical Market Data (JSON):
 2.  **4-Week Price Forecast**: Based on your analysis, provide a week-by-week predicted modal price for the commodity for the upcoming four weeks. The price should be a single number (e.g., 1500), not a range.
 3.  **Suggestion**: Based on your forecast, provide a short, actionable suggestion to the farmer (e.g., "Prices are trending up, consider holding your stock for a couple of weeks for a better return." or "Market seems stable, selling now would be a safe choice.").
 
-Format your response as a JSON object with 'analysis', 'weeklyForecast', and 'suggestion' keys. The 'weeklyForecast' should be an array of objects, each with 'week' and 'price' properties.`,
+Format your response as a JSON object with 'analysis', 'weeklyForecast', and 'suggestion' keys. The 'weeklyForecast' should be an array of objects, each with 'week' and 'price' properties. For example: "weeklyForecast": [{"week": "Week 1", "price": 1500}, {"week": "Week 2", "price": 1550}]`,
 });
 
 const commodityIdentifierPrompt = ai.definePrompt({
