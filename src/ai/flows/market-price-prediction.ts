@@ -25,7 +25,7 @@ export type MarketData = {
   modal_price: string;
 };
 
-async function fetchAllMarketData(limit: number = 2000): Promise<MarketData[]> {
+async function fetchAllMarketData(limit: number = 5000): Promise<MarketData[]> {
   const apiKey = '579b464db66ec23bdd0000018dbacdbba277486960fe9772d8ab4efb';
   const url = `https://api.data.gov.in/resource/9ef84268-d588-465a-a308-a864a43d0070?api-key=${apiKey}&format=json&limit=${limit}`;
   
@@ -42,9 +42,15 @@ const MarketPricePredictionInputSchema = z.object({
 });
 export type MarketPricePredictionInput = z.infer<typeof MarketPricePredictionInputSchema>;
 
+const WeeklyForecastSchema = z.object({
+  week: z.string().describe('The week of the forecast (e.g., "Week 1", "Week 2").'),
+  price: z.number().describe('The predicted modal price for that week.'),
+});
+
 const MarketPricePredictionOutputSchema = z.object({
-  analysis: z.string().describe('A detailed weekly analysis of the price trend, including volatility and patterns.'),
-  predictedPriceRange: z.string().describe('The predicted future price range for the commodity for the upcoming weeks (e.g., "₹1200 - ₹1500 per quintal").'),
+  analysis: z.string().describe('A detailed analysis of the price trend based on historical data.'),
+  weeklyForecast: z.array(WeeklyForecastSchema).describe('A 4-week price forecast for the commodity.'),
+  suggestion: z.string().describe('An actionable suggestion for the user based on the forecast (e.g., whether to sell or hold).'),
 });
 export type MarketPricePredictionOutput = z.infer<typeof MarketPricePredictionOutputSchema>;
 
@@ -65,7 +71,7 @@ const prompt = ai.definePrompt({
   output: {schema: MarketPricePredictionOutputSchema},
   prompt: `You are an expert market analyst specializing in Indian agricultural commodities.
   
-You have been provided with a JSON dataset of recent market prices for a specific commodity. Your task is to perform a weekly analysis of this historical data and predict the future price.
+You have been provided with a JSON dataset of recent market prices for a specific commodity. Your task is to analyze this historical data, predict the future price trend for the next 4 weeks, and provide a suggestion to the farmer.
 
 Commodity to Analyze: {{{commodity}}}
 
@@ -74,11 +80,11 @@ Historical Market Data (JSON):
 {{{marketData}}}
 \`\`\`
 
-1.  **Weekly Analysis**: Analyze the provided data to identify weekly price trends, volatility, and any recurring patterns. Consider the 'arrival_date', 'min_price', 'max_price', and 'modal_price'.
-2.  **Detailed Analysis Report**: Write a brief report summarizing your findings. Explain the trends you've observed.
-3.  **Price Prediction**: Based on your analysis, provide a predicted price range for the commodity for the upcoming weeks.
+1.  **Analysis**: Analyze the provided data to identify price trends, volatility, and any recurring patterns. Consider the 'arrival_date', 'min_price', 'max_price', and 'modal_price'. Write a brief report summarizing your findings.
+2.  **4-Week Price Forecast**: Based on your analysis, provide a week-by-week predicted modal price for the commodity for the upcoming four weeks. The price should be a single number (e.g., 1500), not a range.
+3.  **Suggestion**: Based on your forecast, provide a short, actionable suggestion to the farmer (e.g., "Prices are trending up, consider holding your stock for a couple of weeks for a better return." or "Market seems stable, selling now would be a safe choice.").
 
-Format your response as a JSON object with 'analysis' and 'predictedPriceRange' keys.`,
+Format your response as a JSON object with 'analysis', 'weeklyForecast', and 'suggestion' keys. The 'weeklyForecast' should be an array of objects, each with 'week' and 'price' properties.`,
 });
 
 const commodityIdentifierPrompt = ai.definePrompt({

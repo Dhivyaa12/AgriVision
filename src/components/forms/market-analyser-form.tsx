@@ -9,9 +9,12 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Button } from '@/components/ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Textarea } from '@/components/ui/textarea';
-import { Loader2, TrendingUp, LineChart } from 'lucide-react';
+import { Loader2, TrendingUp, LineChart, Lightbulb } from 'lucide-react';
 import { predictMarketPrice, type MarketPricePredictionOutput } from '@/ai/flows/market-price-prediction';
 import { useTranslation } from '@/hooks/use-translation';
+import { CartesianGrid, Line, XAxis, YAxis, ResponsiveContainer, Tooltip, Legend, LineChart as RechartsLineChart } from 'recharts';
+import { ChartContainer, ChartTooltip, ChartTooltipContent, ChartLegend, ChartLegendContent } from '@/components/ui/chart';
+
 
 const formSchema = z.object({
   description: z.string().min(10, 'Please enter a more detailed description.'),
@@ -26,7 +29,8 @@ const texts = {
     resultTitle: "Price Prediction Analysis",
     resultDescription: "AI-powered market analysis and price forecast.",
     analysis: "Analysis",
-    predictedPrice: "Predicted Price Range",
+    priceForecast: "4-Week Price Forecast",
+    suggestion: "AI Suggestion",
     resultsPlaceholder: "Your price prediction will appear here.",
     quotaError: "You have exceeded your API quota. Please try again later or check your billing plan.",
     noDataError: "No market data found for this commodity. Please try a different one."
@@ -58,12 +62,22 @@ export function MarketAnalyserForm() {
         setError(t('quotaError'));
       } else if (e.message?.includes('No market data found')) {
         setError(t('noDataError'));
-      } else {
+      } else if (e.message?.includes('Could not identify a valid commodity')) {
+        setError(e.message);
+      }
+      else {
         setError('An error occurred while predicting the price.');
       }
     } finally {
       setLoading(false);
     }
+  };
+
+  const chartConfig = {
+    price: {
+      label: "Price (₹)",
+      color: "hsl(var(--chart-1))",
+    },
   };
 
   return (
@@ -115,24 +129,40 @@ export function MarketAnalyserForm() {
           
           {result && !loading && (
             <div className="space-y-6">
-              <div className="flex items-start gap-4">
-                <div className="p-3 bg-primary/10 rounded-full">
-                  <LineChart className="h-6 w-6 text-primary" />
-                </div>
                 <div>
-                  <h3 className="font-semibold">{t('analysis')}</h3>
-                  <p className="text-sm text-muted-foreground">{result.analysis}</p>
+                  <h3 className="font-semibold text-lg mb-2">{t('priceForecast')}</h3>
+                   <ChartContainer config={chartConfig} className="h-[250px] w-full">
+                    <RechartsLineChart data={result.weeklyForecast} margin={{ top: 5, right: 20, left: -10, bottom: 5 }}>
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis dataKey="week" />
+                      <YAxis domain={['dataMin - 100', 'dataMax + 100']} tickFormatter={(value) => `₹${value}`} />
+                      <ChartTooltip
+                        cursor={false}
+                        content={<ChartTooltipContent indicator="dot" />}
+                      />
+                      <ChartLegend content={<ChartLegendContent />} />
+                      <Line dataKey="price" type="monotone" stroke="var(--color-price)" strokeWidth={2} dot={{ fill: "var(--color-price)" }} activeDot={{ r: 6 }}/>
+                    </RechartsLineChart>
+                  </ChartContainer>
                 </div>
-              </div>
-              <div className="flex items-center gap-4">
-                <div className="p-3 bg-accent/10 rounded-full">
-                  <TrendingUp className="h-6 w-6 text-accent" />
+                <div className="flex items-start gap-4">
+                  <div className="p-3 bg-primary/10 rounded-full mt-1">
+                    <LineChart className="h-6 w-6 text-primary" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold">{t('analysis')}</h3>
+                    <p className="text-sm text-muted-foreground">{result.analysis}</p>
+                  </div>
                 </div>
-                <div>
-                  <h3 className="font-semibold">{t('predictedPrice')}</h3>
-                  <p className="text-lg font-bold text-accent-foreground">{result.predictedPriceRange}</p>
+                <div className="flex items-start gap-4">
+                  <div className="p-3 bg-accent/10 rounded-full mt-1">
+                    <Lightbulb className="h-6 w-6 text-accent" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold">{t('suggestion')}</h3>
+                    <p className="text-sm font-bold text-accent-foreground">{result.suggestion}</p>
+                  </div>
                 </div>
-              </div>
             </div>
           )}
           {!loading && !result && !error && (
