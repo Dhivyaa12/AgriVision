@@ -43,8 +43,8 @@ const MarketPricePredictionInputSchema = z.object({
 export type MarketPricePredictionInput = z.infer<typeof MarketPricePredictionInputSchema>;
 
 const MarketPricePredictionOutputSchema = z.object({
-  analysis: z.string().describe('A brief analysis of the price trend.'),
-  predictedPriceRange: z.string().describe('The predicted future price range for the commodity (e.g., "₹1200 - ₹1500 per quintal").'),
+  analysis: z.string().describe('A detailed weekly analysis of the price trend, including volatility and patterns.'),
+  predictedPriceRange: z.string().describe('The predicted future price range for the commodity for the upcoming weeks (e.g., "₹1200 - ₹1500 per quintal").'),
 });
 export type MarketPricePredictionOutput = z.infer<typeof MarketPricePredictionOutputSchema>;
 
@@ -65,7 +65,7 @@ const prompt = ai.definePrompt({
   output: {schema: MarketPricePredictionOutputSchema},
   prompt: `You are an expert market analyst specializing in Indian agricultural commodities.
   
-You have been provided with a JSON dataset of recent market prices for various commodities. Your task is to analyze this data and predict the future price for a specific commodity.
+You have been provided with a JSON dataset of recent market prices for a specific commodity. Your task is to perform a weekly analysis of this historical data and predict the future price.
 
 Commodity to Analyze: {{{commodity}}}
 
@@ -74,7 +74,11 @@ Historical Market Data (JSON):
 {{{marketData}}}
 \`\`\`
 
-Based on the provided data, perform a brief analysis of the price trend and then provide a predicted price range for the commodity for the near future (e.g., next few weeks). Consider factors like price volatility, and recent min/max/modal prices in your analysis.`,
+1.  **Weekly Analysis**: Analyze the provided data to identify weekly price trends, volatility, and any recurring patterns. Consider the 'arrival_date', 'min_price', 'max_price', and 'modal_price'.
+2.  **Detailed Analysis Report**: Write a brief report summarizing your findings. Explain the trends you've observed.
+3.  **Price Prediction**: Based on your analysis, provide a predicted price range for the commodity for the upcoming weeks.
+
+Format your response as a JSON object with 'analysis' and 'predictedPriceRange' keys.`,
 });
 
 const commodityIdentifierPrompt = ai.definePrompt({
