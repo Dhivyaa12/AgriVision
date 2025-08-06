@@ -103,7 +103,7 @@ const predictMarketPriceFlow = ai.defineFlow(
     outputSchema: MarketPricePredictionOutputSchema,
   },
   async ({ commodity: description }) => {
-    const allData = await fetchAllMarketData();
+    const allData = await fetchAllMarketData(5000);
     const uniqueCommodities = [...new Set(allData.map(item => item.commodity))];
 
     const { output: identifiedCommodity } = await commodityIdentifierPrompt({
