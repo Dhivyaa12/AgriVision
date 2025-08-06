@@ -25,7 +25,7 @@ export type MarketData = {
   modal_price: string;
 };
 
-async function fetchAllMarketData(limit: number = 2000): Promise<MarketData[]> {
+async function fetchAllMarketData(limit: number = 5000): Promise<MarketData[]> {
   const apiKey = '579b464db66ec23bdd0000018dbacdbba277486960fe9772d8ab4efb';
   const url = `https://api.data.gov.in/resource/9ef84268-d588-465a-a308-a864a43d0070?api-key=${apiKey}&format=json&limit=${limit}`;
   
