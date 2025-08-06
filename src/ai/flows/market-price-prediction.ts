@@ -150,7 +150,7 @@ const predictMarketPriceFlow = ai.defineFlow(
 
     const { output: identifiedCommodity } = await commodityIdentifierPrompt({
         description,
-        commoditiesList: uniqueCommodities.slice(0, 400),
+        commoditiesList: uniqueCommodities,
     });
 
     if (!identifiedCommodity || !identifiedCommodity.commodity || identifiedCommodity.commodity === 'Unknown') {
