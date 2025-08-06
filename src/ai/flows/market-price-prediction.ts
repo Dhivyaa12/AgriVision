@@ -25,7 +25,7 @@ export type MarketData = {
   modal_price: string;
 };
 
-async function fetchAllMarketData(limit: number = 5000): Promise<MarketData[]> {
+async function fetchAllMarketData(limit: number = 2000): Promise<MarketData[]> {
   const apiKey = '579b464db66ec23bdd0000018dbacdbba277486960fe9772d8ab4efb';
   const url = `https://api.data.gov.in/resource/9ef84268-d588-465a-a308-a864a43d0070?api-key=${apiKey}&format=json&limit=${limit}`;
   
@@ -89,15 +89,16 @@ const commodityIdentifierPrompt = ai.definePrompt({
     })},
     output: { schema: z.object({ commodity: z.string() }) },
     prompt: `From the user's description, identify the single most likely commodity they are asking about.
+The commodity MUST be one of the items from the provided list.
     
-    User Description: "{{{description}}}"
+User Description: "{{{description}}}"
 
-    Here is a list of available commodities from the market data:
-    {{#each commoditiesList}}
-    - {{{this}}}
-    {{/each}}
+Here is a list of available commodities from the market data. Find the best match:
+{{#each commoditiesList}}
+- {{{this}}}
+{{/each}}
     
-    Respond with only the name of the most relevant commodity from the list.`,
+Respond with only the name of the most relevant commodity from the list. If you cannot find a clear match, respond with "Unknown".`,
 });
 
 const predictMarketPriceFlow = ai.defineFlow(
@@ -107,24 +108,26 @@ const predictMarketPriceFlow = ai.defineFlow(
     outputSchema: MarketPricePredictionOutputSchema,
   },
   async ({ commodity: description }) => {
-    const allData = await fetchAllMarketData(5000);
+    // Fetch a large, but not full, dataset to get a comprehensive list of commodities
+    const allData = await fetchAllMarketData(5000); 
     const uniqueCommodities = [...new Set(allData.map(item => item.commodity))];
 
     const { output: identifiedCommodity } = await commodityIdentifierPrompt({
         description,
-        commoditiesList: uniqueCommodities.slice(0, 200), // Provide a sample to the model
+        commoditiesList: uniqueCommodities.slice(0, 400), // Give a larger sample to the model
     });
 
-    if (!identifiedCommodity || !identifiedCommodity.commodity) {
-        throw new Error("Could not identify commodity from description.");
+    if (!identifiedCommodity || !identifiedCommodity.commodity || identifiedCommodity.commodity === 'Unknown') {
+        throw new Error(`Could not identify a valid commodity from the description: "${description}"`);
     }
     
     const commodityToAnalyze = identifiedCommodity.commodity;
 
+    // Now filter the fetched data for the identified commodity
     const commodityData = allData.filter(item => item.commodity.toLowerCase() === commodityToAnalyze.toLowerCase());
 
     if (commodityData.length === 0) {
-      throw new Error(`No market data found for commodity: ${commodityToAnalyze}`);
+      throw new Error(`No market data found for commodity: ${commodityToAnalyze}. It might be a rare commodity or the data is not available in the recent records.`);
     }
     
     // Provide a sample of the data to the model to avoid exceeding token limits
