@@ -34,7 +34,8 @@ const texts = {
     resultsPlaceholder: "Your price prediction will appear here.",
     quotaError: "You have exceeded your API quota. Please try again later or check your billing plan.",
     noDataError: "No market data found for this commodity. It might be a rare commodity or the data is not available in the recent records. Please try a different one.",
-    identificationError: "Could not identify a valid commodity from your description. Please be more specific."
+    identificationError: "Could not identify a valid commodity from your description. Please be more specific.",
+    networkError: "A network error occurred. This may be due to restrictions in the development environment that block outbound API calls. Consider using a proxy or serverless function to access the external API."
 };
 
 export function MarketAnalyserForm() {
@@ -65,7 +66,10 @@ export function MarketAnalyserForm() {
         setError(t('noDataError'));
       } else if (e.message?.includes('Could not identify a valid commodity')) {
         setError(t('identificationError'));
-      } else {
+      } else if (e.message?.includes('network error occurred')) {
+        setError(t('networkError'));
+      }
+       else {
         setError('An error occurred while predicting the price.');
       }
     } finally {
