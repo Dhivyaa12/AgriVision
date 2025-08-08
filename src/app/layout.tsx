@@ -1,3 +1,4 @@
+
 'use client';
 import type { Metadata } from 'next';
 import Link from 'next/link';
@@ -79,6 +80,14 @@ function AppLayout({ children }: { children: React.ReactNode }) {
               </Link>
             </SidebarMenuItem>
             <SidebarMenuItem>
+              <Link href="/sensor-analysis" passHref>
+                <SidebarMenuButton tooltip={t('sensorAnalysis')}>
+                  <Thermometer />
+                  <span>{t('sensorAnalysis')}</span>
+                </SidebarMenuButton>
+              </Link>
+            </SidebarMenuItem>
+            <SidebarMenuItem>
               <Link href="/crop-diagnosis" passHref>
                 <SidebarMenuButton tooltip={t('cropDiagnosis')}>
                   <ScanSearch />
@@ -107,14 +116,6 @@ function AppLayout({ children }: { children: React.ReactNode }) {
                 <SidebarMenuButton tooltip={t('marketAnalyser')}>
                   <TrendingUp />
                   <span>{t('marketAnalyser')}</span>
-                </SidebarMenuButton>
-              </Link>
-            </SidebarMenuItem>
-            <SidebarMenuItem>
-              <Link href="/sensor-analysis" passHref>
-                <SidebarMenuButton tooltip={t('sensorAnalysis')}>
-                  <Thermometer />
-                  <span>{t('sensorAnalysis')}</span>
                 </SidebarMenuButton>
               </Link>
             </SidebarMenuItem>
