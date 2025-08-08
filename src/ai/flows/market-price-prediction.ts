@@ -10,8 +10,6 @@
 
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
-import fetch from 'node-fetch';
-
 
 export type MarketData = {
   state: string;
@@ -179,3 +177,5 @@ const predictMarketPriceFlow = ai.defineFlow(
     return structuredOutput!;
   }
 );
+
+    

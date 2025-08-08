@@ -17,14 +17,14 @@ import { ChartContainer, ChartTooltip, ChartTooltipContent, ChartLegend, ChartLe
 
 
 const formSchema = z.object({
-  description: z.string().min(10, 'Please enter a more detailed description.'),
+  description: z.string().min(3, 'Please enter a more detailed description.'),
 });
 
 const texts = {
     formTitle: "Predict Commodity Price",
     formDescription: "Describe the commodity you want a price prediction for.",
     commodityLabel: "Product Description",
-    commodityPlaceholder: "e.g., 'I want to know the price for long-staple cotton from Gujarat.'",
+    commodityPlaceholder: "e.g., 'I want to know the price for long-staple cotton from Gujarat.' or simply 'Paddy'",
     predictButton: "Predict Price",
     resultTitle: "Price Prediction Analysis",
     resultDescription: "AI-powered market analysis and price forecast.",
@@ -33,7 +33,8 @@ const texts = {
     suggestion: "AI Suggestion",
     resultsPlaceholder: "Your price prediction will appear here.",
     quotaError: "You have exceeded your API quota. Please try again later or check your billing plan.",
-    noDataError: "No market data found for this commodity. Please try a different one."
+    noDataError: "No market data found for this commodity. It might be a rare commodity or the data is not available in the recent records. Please try a different one.",
+    identificationError: "Could not identify a valid commodity from your description. Please be more specific."
 };
 
 export function MarketAnalyserForm() {
@@ -63,9 +64,8 @@ export function MarketAnalyserForm() {
       } else if (e.message?.includes('No market data found')) {
         setError(t('noDataError'));
       } else if (e.message?.includes('Could not identify a valid commodity')) {
-        setError(e.message);
-      }
-      else {
+        setError(t('identificationError'));
+      } else {
         setError('An error occurred while predicting the price.');
       }
     } finally {
@@ -121,7 +121,7 @@ export function MarketAnalyserForm() {
         </CardHeader>
         <CardContent>
           {loading && (
-            <div className="flex justify-center items-center h-full">
+            <div className="flex justify-center items-center h-full min-h-[300px]">
               <Loader2 className="h-8 w-8 animate-spin text-primary" />
             </div>
           )}
@@ -152,6 +152,7 @@ export function MarketAnalyserForm() {
                   <div>
                     <h3 className="font-semibold">{t('analysis')}</h3>
                     <p className="text-sm text-muted-foreground">{result.analysis}</p>
+
                   </div>
                 </div>
                 <div className="flex items-start gap-4">
@@ -175,3 +176,5 @@ export function MarketAnalyserForm() {
     </div>
   );
 }
+
+    
