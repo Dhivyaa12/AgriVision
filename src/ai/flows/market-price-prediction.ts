@@ -23,15 +23,41 @@ export type MarketData = {
   modal_price: string;
 };
 
+async function fetchWithTimeout(url: string, options: any = {}, timeout = 15000) {
+  try {
+    console.log(`Fetching URL: ${url}`);
+    const controller = new AbortController();
+    const id = setTimeout(() => controller.abort(), timeout);
+
+    const response = await fetch(url, {
+      ...options,
+      signal: controller.signal,
+    });
+
+    clearTimeout(id);
+
+    if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Failed to fetch market data. Status: ${response.status}. Body: ${errorText}`);
+    }
+    
+    return response.json();
+
+  } catch (error: any) {
+    if (error.name === 'AbortError') {
+      throw new Error('Request to market data API timed out.');
+    }
+    console.error("Fetch error:", error);
+    throw new Error(`A network error occurred: ${error.message}`);
+  }
+}
+
+
 async function fetchAllMarketData(limit: number = 5000): Promise<MarketData[]> {
   const apiKey = '579b464db66ec23bdd0000018dbacdbba277486960fe9772d8ab4efb';
   const url = `https://api.data.gov.in/resource/9ef84268-d588-465a-a308-a864a43d0070?api-key=${apiKey}&format=json&limit=${limit}`;
   
-  const response = await fetch(url);
-  if (!response.ok) {
-    throw new Error('Failed to fetch market data.');
-  }
-  const result = await response.json();
+  const result = await fetchWithTimeout(url);
   return (result as any).records;
 }
 
@@ -177,5 +203,3 @@ const predictMarketPriceFlow = ai.defineFlow(
     return structuredOutput!;
   }
 );
-
-    
