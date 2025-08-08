@@ -10,6 +10,7 @@ import {
   Settings,
   LifeBuoy,
   TrendingUp,
+  Thermometer,
 } from "lucide-react"
 
 import './globals.css';
@@ -40,6 +41,7 @@ const texts = {
   cropRecommendation: "Crop Recommendation",
   marketWatch: "Market Watch",
   marketAnalyser: "Market Analyser",
+  sensorAnalysis: "Sensor Analysis",
   governmentSchemes: "Government Schemes",
   support: "Support",
   settings: "Settings",
@@ -105,6 +107,14 @@ function AppLayout({ children }: { children: React.ReactNode }) {
                 <SidebarMenuButton tooltip={t('marketAnalyser')}>
                   <TrendingUp />
                   <span>{t('marketAnalyser')}</span>
+                </SidebarMenuButton>
+              </Link>
+            </SidebarMenuItem>
+            <SidebarMenuItem>
+              <Link href="/sensor-analysis" passHref>
+                <SidebarMenuButton tooltip={t('sensorAnalysis')}>
+                  <Thermometer />
+                  <span>{t('sensorAnalysis')}</span>
                 </SidebarMenuButton>
               </Link>
             </SidebarMenuItem>

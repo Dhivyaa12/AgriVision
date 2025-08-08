@@ -1,8 +1,7 @@
-
 'use client';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ScanSearch, Sprout, LineChart, Landmark, ArrowRight, TrendingUp } from "lucide-react";
+import { ScanSearch, Sprout, LineChart, Landmark, ArrowRight, TrendingUp, Thermometer } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import { useTranslation } from "@/hooks/use-translation";
@@ -35,6 +34,13 @@ const featuresData = {
     description: "Predict future commodity prices based on historical market data and trends.",
     href: "/market-analyser",
     cta: "Analyse Prices",
+  },
+  sensorAnalysis: {
+    icon: Thermometer,
+    title: "Sensor Analysis",
+    description: "Get AI-powered analysis of farm sensor data for soil and environmental conditions.",
+    href: "/sensor-analysis",
+    cta: "Analyze Sensor Data",
   },
   governmentSchemes: {
     icon: Landmark,

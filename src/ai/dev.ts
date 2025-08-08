@@ -1,3 +1,4 @@
+'use server';
 import { config } from 'dotenv';
 config();
 
@@ -8,3 +9,4 @@ import '@/ai/flows/text-to-speech.ts';
 import '@/ai/flows/speech-to-text.ts';
 import '@/ai/flows/translate-text.ts';
 import '@/ai/flows/market-price-prediction.ts';
+import '@/ai/flows/sensor-analysis.ts';
