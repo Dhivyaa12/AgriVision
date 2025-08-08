@@ -47,6 +47,9 @@ async function fetchWithTimeout(url: string, options: any = {}, timeout = 15000)
     if (error.name === 'AbortError') {
       throw new Error('Request to market data API timed out.');
     }
+    if (error.message.includes('fetch failed')) {
+        throw new Error('A network error occurred. This may be due to restrictions in the development environment that block outbound API calls. Consider using a proxy or serverless function to access the external API.');
+    }
     console.error("Fetch error:", error);
     throw new Error(`A network error occurred: ${error.message}`);
   }
