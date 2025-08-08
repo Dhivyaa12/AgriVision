@@ -8,20 +8,12 @@ import cropData from '@/lib/crop-data.json';
 
 const texts = {
   title: "Live Sensor Analysis",
-  description: "Real-time sensor data from across various regions. The data updates automatically every 30 seconds. Click 'Analyze Data' to get AI-powered insights for the current record.",
+  description: "Real-time sensor data from across various regions. Click 'Analyze Data' to get AI-powered insights for the current record.",
 };
 
 export default function SensorAnalysisPage() {
   const { t } = useTranslation(texts);
   const [currentIndex, setCurrentIndex] = useState(0);
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentIndex((prevIndex) => (prevIndex + 1) % cropData.length);
-    }, 30000); // 30 seconds
-
-    return () => clearInterval(interval);
-  }, []);
 
   const currentData = cropData[currentIndex];
 
