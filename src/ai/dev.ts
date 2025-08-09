@@ -10,3 +10,4 @@ import '@/ai/flows/speech-to-text.ts';
 import '@/ai/flows/translate-text.ts';
 import '@/ai/flows/market-price-prediction.ts';
 import '@/ai/flows/sensor-analysis.ts';
+import '@/ai/flows/market-data.ts';

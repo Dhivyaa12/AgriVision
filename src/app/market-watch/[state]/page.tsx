@@ -5,6 +5,8 @@ import { PageHeader, PageHeaderHeading, PageHeaderDescription } from '@/componen
 import { MarketWatchTable } from '@/components/market-watch-table';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useTranslation } from '@/hooks/use-translation';
+import { getMarketData } from '@/ai/flows/market-data';
+
 
 export type MarketData = {
   state: string;
@@ -23,18 +25,6 @@ const texts = {
   description: "Daily Mandi prices for vegetables, grains, and other crops.",
   fetchError: "Failed to fetch market data. The external API might be temporarily unavailable. Please try again later.",
 };
-
-async function fetchMarketData(limit: number = 1000): Promise<MarketData[]> {
-  const apiKey = '579b464db66ec23bdd0000018dbacdbba277486960fe9772d8ab4efb';
-  const url = `https://api.data.gov.in/resource/9ef84268-d588-465a-a308-a864a43d0070?api-key=${apiKey}&format=json&limit=${limit}`;
-  
-  const response = await fetch(url);
-  if (!response.ok) {
-    throw new Error('Failed to fetch market data.');
-  }
-  const result = await response.json();
-  return result.records;
-}
 
 export default function StateMarketWatchPage({ params }: { params: { state: string } }) {
   const [data, setData] = useState<MarketData[]>([]);
@@ -56,8 +46,7 @@ export default function StateMarketWatchPage({ params }: { params: { state: stri
           return;
       }
       try {
-        const allData = await fetchMarketData(5000); 
-        const stateData = allData.filter(record => record.state === decodedStateName);
+        const stateData = await getMarketData({ state: decodedStateName });
         setData(stateData);
       } catch (err) {
         if (err instanceof Error) {
@@ -70,7 +59,9 @@ export default function StateMarketWatchPage({ params }: { params: { state: stri
       }
     }
 
-    fetchData();
+    if (params.state) {
+      fetchData();
+    }
   }, [params.state, t]);
 
   return (
