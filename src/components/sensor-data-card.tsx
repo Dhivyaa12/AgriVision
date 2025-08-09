@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Loader2, TestTube, ChevronsRight, Thermometer, Droplets, Sun, MapPin, Calendar, Cloudy, Sprout, Landmark, Building, PersonStanding, ExternalLink, CheckCircle } from 'lucide-react';
@@ -65,7 +65,7 @@ export function SensorDataCard({ data }: SensorDataCardProps) {
     return Math.round(avg);
   }
 
-  const handleAnalyze = async () => {
+  const handleAnalyze = useCallback(async () => {
     setLoading(true);
     setResult(null);
     setError(null);
@@ -90,7 +90,12 @@ export function SensorDataCard({ data }: SensorDataCardProps) {
     } finally {
       setLoading(false);
     }
-  };
+  }, [data, t]);
+
+  useEffect(() => {
+    handleAnalyze();
+  }, [handleAnalyze]);
+
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
