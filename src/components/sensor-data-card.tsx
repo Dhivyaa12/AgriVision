@@ -4,10 +4,12 @@
 import { useState } from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Loader2, TestTube, ChevronsRight, Thermometer, Droplets, Sun, MapPin, Calendar, Cloudy } from 'lucide-react';
+import { Loader2, TestTube, ChevronsRight, Thermometer, Droplets, Sun, MapPin, Calendar, Cloudy, Sprout, Landmark, Building, PersonStanding, ExternalLink, CheckCircle } from 'lucide-react';
 import { analyzeSensorData, type SensorAnalysisOutput } from '@/ai/flows/sensor-analysis';
 import { useTranslation } from '@/hooks/use-translation';
 import { Badge } from '@/components/ui/badge';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
+
 
 type SensorData = {
     State: string;
@@ -35,12 +37,19 @@ const texts = {
     temperature: "Temperature",
     sunlight: "Sunlight",
     analyzeButton: "Analyze Data",
-    resultTitle: "Sensor Data Analysis",
-    resultDescription: "AI-powered insights based on the sensor readings.",
-    analysis: "Analysis",
+    resultTitle: "Comprehensive Analysis",
+    resultDescription: "AI-powered insights, recommendations, and schemes.",
+    analysis: "Soil Analysis",
     recommendations: "Recommendations",
     resultsPlaceholder: "Click 'Analyze Data' to see the AI-powered analysis.",
     quotaError: "You have exceeded your API quota. Please try again later or check your billing plan.",
+    cropRecommendations: "Crop Recommendations",
+    recommendedCrops: "Recommended Crops",
+    governmentSchemes: "Government Schemes",
+    centralSchemes: "Central Government Schemes",
+    stateSchemes: "State Government Schemes",
+    womenSchemes: "Women-Specific Schemes",
+    noSchemes: "No specific schemes found.",
 };
 
 export function SensorDataCard({ data }: SensorDataCardProps) {
@@ -154,27 +163,116 @@ export function SensorDataCard({ data }: SensorDataCardProps) {
           {error && <p className="text-destructive">{error}</p>}
           
           {result && !loading && (
-            <div className="space-y-6">
-                <div className="flex items-start gap-4">
-                    <div className="p-3 bg-primary/10 rounded-full mt-1">
-                        <TestTube className="h-6 w-6 text-primary" />
-                    </div>
-                    <div>
-                        <h3 className="font-semibold">{t('analysis')}</h3>
+             <Accordion type="multiple" className="w-full" defaultValue={['soil-analysis', 'crop-recs', 'gov-schemes']}>
+                <AccordionItem value="soil-analysis">
+                    <AccordionTrigger>
+                        <div className="flex items-center gap-2">
+                            <TestTube className="h-5 w-5 text-primary" />
+                            {t('analysis')}
+                        </div>
+                    </AccordionTrigger>
+                    <AccordionContent>
                         <p className="text-sm text-muted-foreground">{result.analysis}</p>
-                    </div>
-                </div>
-                <div className="flex items-start gap-4">
-                    <div className="p-3 bg-accent/10 rounded-full mt-1">
-                        <ChevronsRight className="h-6 w-6 text-accent" />
-                    </div>
-                    <div>
-                        <h3 className="font-semibold">{t('recommendations')}</h3>
-                        <p className="text-sm text-muted-foreground">{result.recommendations}</p>
-                    </div>
-                </div>
-            </div>
+                    </AccordionContent>
+                </AccordionItem>
+                <AccordionItem value="crop-recs">
+                     <AccordionTrigger>
+                        <div className="flex items-center gap-2">
+                            <Sprout className="h-5 w-5 text-primary" />
+                            {t('cropRecommendations')}
+                        </div>
+                    </AccordionTrigger>
+                    <AccordionContent>
+                         <ul className="space-y-3">
+                            {result.recommendedCrops.crops.map((crop, index) => (
+                            <li key={index} className="pb-3 border-b border-border/50 last:border-b-0">
+                                <p className="font-medium flex-1">{crop}</p>
+                                {result.recommendedCrops.reasons[index] && (
+                                <div className="flex items-start gap-2 mt-1">
+                                    <CheckCircle className="h-4 w-4 mt-1 text-accent flex-shrink-0" />
+                                    <p className="text-xs text-muted-foreground">{result.recommendedCrops.reasons[index]}</p>
+                                </div>
+                                )}
+                            </li>
+                            ))}
+                        </ul>
+                    </AccordionContent>
+                </AccordionItem>
+                <AccordionItem value="gov-schemes">
+                     <AccordionTrigger>
+                        <div className="flex items-center gap-2">
+                            <Landmark className="h-5 w-5 text-primary" />
+                            {t('governmentSchemes')}
+                        </div>
+                    </AccordionTrigger>
+                    <AccordionContent>
+                       <Accordion type="multiple" className="w-full" defaultValue={['central', 'state', 'women']}>
+                            <AccordionItem value="central">
+                                <AccordionTrigger className="text-xs py-2">
+                                <div className="flex items-center gap-2">
+                                    <Landmark className="h-4 w-4" />
+                                    {t('centralSchemes')}
+                                </div>
+                                </AccordionTrigger>
+                                <AccordionContent className="pt-2">
+                                <ul className="list-disc pl-6 space-y-2 text-muted-foreground">
+                                    {result.governmentSchemes.centralSchemes.length > 0 ? result.governmentSchemes.centralSchemes.map((scheme, index) => (
+                                    <li key={`central-${index}`} className="text-xs">
+                                        <a href={scheme.url} target="_blank" rel="noopener noreferrer" className="hover:underline hover:text-primary flex items-center gap-1">
+                                        {scheme.name}
+                                        <ExternalLink className="h-3 w-3" />
+                                        </a>
+                                    </li>
+                                    )) : <li>{t('noSchemes')}</li>}
+                                </ul>
+                                </AccordionContent>
+                            </AccordionItem>
+                             <AccordionItem value="state">
+                                <AccordionTrigger className="text-xs py-2">
+                                <div className="flex items-center gap-2">
+                                    <Building className="h-4 w-4" />
+                                    {t('stateSchemes')}
+                                </div>
+                                </AccordionTrigger>
+                                <AccordionContent className="pt-2">
+                                <ul className="list-disc pl-6 space-y-2 text-muted-foreground">
+                                    {result.governmentSchemes.stateSchemes.length > 0 ? result.governmentSchemes.stateSchemes.map((scheme, index) => (
+                                    <li key={`state-${index}`} className="text-xs">
+                                        <a href={scheme.url} target="_blank" rel="noopener noreferrer" className="hover:underline hover:text-primary flex items-center gap-1">
+                                        {scheme.name}
+                                        <ExternalLink className="h-3 w-3" />
+                                        </a>
+                                    </li>
+                                    )) : <li>{t('noSchemes')}</li>}
+                                </ul>
+                                </AccordionContent>
+                            </AccordionItem>
+                            <AccordionItem value="women">
+                                <AccordionTrigger className="text-xs py-2">
+                                <div className="flex items-center gap-2">
+                                    <PersonStanding className="h-4 w-4" />
+                                    {t('womenSchemes')}
+                                </div>
+                                </AccordionTrigger>
+                                <AccordionContent className="pt-2">
+                                <ul className="list-disc pl-6 space-y-2 text-muted-foreground">
+                                    {result.governmentSchemes.womenSchemes.length > 0 ? result.governmentSchemes.womenSchemes.map((scheme, index) => (
+                                    <li key={`women-${index}`} className="text-xs">
+                                        <a href={scheme.url} target="_blank" rel="noopener noreferrer" className="hover:underline hover:text-primary flex items-center gap-1">
+                                        {scheme.name}
+                                        <ExternalLink className="h-3 w-3" />
+                                        </a>
+                                    </li>
+                                    )) : <li>{t('noSchemes')}</li>}
+                                </ul>
+                                </AccordionContent>
+                            </AccordionItem>
+                       </Accordion>
+                    </AccordionContent>
+                </AccordionItem>
+            </Accordion>
           )}
+
           {!loading && !result && !error && (
             <div className="text-center text-muted-foreground py-10">
               {t('resultsPlaceholder')}
