@@ -20,6 +20,7 @@ import { translateText } from '@/ai/flows/translate-text';
 
 const formSchema = z.object({
   soilNature: z.string().min(1, 'Please select a soil type.'),
+  phValue: z.coerce.number().min(0).max(14, 'pH must be between 0 and 14.'),
   weatherConditions: z.string().min(1, 'Please describe the weather.'),
   state: z.string().min(2, 'Please enter a state.'),
 });
@@ -44,6 +45,8 @@ const texts = {
     formDescription: "Fill in the details below to get AI-powered crop suggestions.",
     soilLabel: "Soil Nature",
     soilPlaceholder: "Select soil type",
+    phLabel: "Soil pH",
+    phPlaceholder: "e.g., 6.5",
     weatherLabel: "Current Weather",
     weatherPlaceholder: "e.g., Sunny, 28°C",
     stateLabel: "State",
@@ -215,6 +218,19 @@ export function CropRecommendationForm() {
               />
               <FormField
                 control={form.control}
+                name="phValue"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t('phLabel')}</FormLabel>
+                    <FormControl>
+                      <Input type="number" step="0.1" placeholder={t('phPlaceholder')} {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
                 name="weatherConditions"
                 render={({ field }) => (
                   <FormItem>
@@ -334,5 +350,3 @@ export function CropRecommendationForm() {
     </div>
   );
 }
-
-    

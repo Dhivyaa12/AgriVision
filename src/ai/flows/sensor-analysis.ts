@@ -88,6 +88,7 @@ const sensorAnalysisFlow = ai.defineFlow(
     // 2. Get crop recommendations
     const cropRecs = await recommendBestCrops({
         soilNature: input.soilType,
+        phValue: input.phValue,
         weatherConditions: `${input.sunlightLevel} sunlight, ${input.temperature}°C, ${input.season} season.`,
         state: input.state,
     });

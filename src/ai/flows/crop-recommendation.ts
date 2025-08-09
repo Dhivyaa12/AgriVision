@@ -1,3 +1,4 @@
+
 'use server';
 
 /**
@@ -19,6 +20,7 @@ const CropRecommendationInputSchema = z.object({
     .string()
     .describe('The current weather conditions, e.g., sunny, rainy, cloudy.'),
   state: z.string().describe('The state in which the farm is located.'),
+  phValue: z.number().describe('The pH value of the soil.'),
 });
 export type CropRecommendationInput = z.infer<typeof CropRecommendationInputSchema>;
 
@@ -42,13 +44,14 @@ const prompt = ai.definePrompt({
   name: 'cropRecommendationPrompt',
   input: {schema: CropRecommendationInputSchema},
   output: {schema: CropRecommendationOutputSchema},
-  prompt: `You are an expert agricultural advisor. Based on the soil nature, weather conditions, and state provided by the user, recommend the best crops to plant.
+  prompt: `You are an expert agricultural advisor. Based on the soil nature, pH value, weather conditions, and state provided by the user, recommend the best crops to plant.
 
 Soil Nature: {{{soilNature}}}
+Soil pH: {{{phValue}}}
 Weather Conditions: {{{weatherConditions}}}
 State: {{{state}}}
 
-Consider the local climate, soil composition, and typical crop yields in the given state. Provide a list of recommended crops and a brief explanation for each recommendation.
+Crucially, only recommend crops that are suitable for the given soil pH value. Consider the local climate, soil composition, and typical crop yields in the given state. Provide a list of recommended crops and a brief explanation for each recommendation, explicitly mentioning why it's suitable for the pH level.
 
 Output the data as JSON in the following format:
 \n{\n  "recommendedCrops": ["crop1", "crop2", ...],\n  "reasons": ["reason1", "reason2", ...]
