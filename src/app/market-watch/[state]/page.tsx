@@ -1,6 +1,6 @@
 
 'use client';
-import { useEffect, useState, use } from 'react';
+import { useEffect, useState } from 'react';
 import { PageHeader, PageHeaderHeading, PageHeaderDescription } from '@/components/page-header';
 import { MarketWatchTable } from '@/components/market-watch-table';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -21,31 +21,19 @@ export type MarketData = {
 const texts = {
   title: "Market Watch for",
   description: "Daily Mandi prices for vegetables, grains, and other crops.",
+  fetchError: "Failed to fetch market data. The external API might be temporarily unavailable. Please try again later.",
 };
 
-async function fetchAllMarketData(
-  limit: number = 100,
-  offset: number = 0,
-  allRecords: MarketData[] = []
-): Promise<MarketData[]> {
+async function fetchMarketData(limit: number = 1000): Promise<MarketData[]> {
   const apiKey = '579b464db66ec23bdd0000018dbacdbba277486960fe9772d8ab4efb';
-  const url = `https://api.data.gov.in/resource/9ef84268-d588-465a-a308-a864a43d0070?api-key=${apiKey}&format=json&limit=${limit}&offset=${offset}`;
+  const url = `https://api.data.gov.in/resource/9ef84268-d588-465a-a308-a864a43d0070?api-key=${apiKey}&format=json&limit=${limit}`;
   
   const response = await fetch(url);
   if (!response.ok) {
     throw new Error('Failed to fetch market data.');
   }
   const result = await response.json();
-  const records = result.records;
-  
-  allRecords.push(...records);
-
-  // The API seems to have a cap around 5000 records for total, let's fetch up to a reasonable limit.
-  if (records.length === limit && (offset + limit) < 5000) {
-    return fetchAllMarketData(limit, offset + limit, allRecords);
-  } else {
-    return allRecords;
-  }
+  return result.records;
 }
 
 export default function StateMarketWatchPage({ params }: { params: { state: string } }) {
@@ -53,19 +41,24 @@ export default function StateMarketWatchPage({ params }: { params: { state: stri
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const { t } = useTranslation(texts);
-  const stateName = decodeURIComponent(use(params).state);
+  const stateName = decodeURIComponent(params.state || '');
 
   useEffect(() => {
     async function fetchData() {
       setLoading(true);
       setError(null);
+      if (!stateName) {
+          setError("State not specified.");
+          setLoading(false);
+          return;
+      }
       try {
-        const allData = await fetchAllMarketData();
+        const allData = await fetchMarketData(1000); // Fetch latest 1000 records
         const stateData = allData.filter(record => record.state === stateName);
         setData(stateData);
       } catch (err) {
         if (err instanceof Error) {
-          setError(err.message);
+          setError(t('fetchError'));
         } else {
           setError('An unknown error occurred.');
         }
@@ -75,7 +68,7 @@ export default function StateMarketWatchPage({ params }: { params: { state: stri
     }
 
     fetchData();
-  }, [stateName]);
+  }, [stateName, t]);
 
   return (
     <div className="container mx-auto py-8 px-4 md:px-6">
@@ -95,7 +88,7 @@ export default function StateMarketWatchPage({ params }: { params: { state: stri
             <Skeleton className="h-12 w-full" />
           </div>
         ) : error ? (
-          <div className="text-destructive">{error}</div>
+          <div className="text-destructive text-center">{error}</div>
         ) : (
           <MarketWatchTable data={data} />
         )}
