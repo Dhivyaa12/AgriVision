@@ -41,7 +41,7 @@ export default function StateMarketWatchPage({ params }: { params: { state: stri
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const { t } = useTranslation(texts);
-  const stateName = decodeURIComponent(params.state || '');
+  const stateName = params.state ? decodeURIComponent(params.state) : '';
 
   useEffect(() => {
     async function fetchData() {
@@ -53,7 +53,7 @@ export default function StateMarketWatchPage({ params }: { params: { state: stri
           return;
       }
       try {
-        const allData = await fetchMarketData(1000); // Fetch latest 1000 records
+        const allData = await fetchMarketData(5000); 
         const stateData = allData.filter(record => record.state === stateName);
         setData(stateData);
       } catch (err) {
