@@ -41,20 +41,23 @@ export default function StateMarketWatchPage({ params }: { params: { state: stri
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const { t } = useTranslation(texts);
-  const stateName = params.state ? decodeURIComponent(params.state) : '';
+  const [stateName, setStateName] = useState('');
 
   useEffect(() => {
+    const decodedStateName = params.state ? decodeURIComponent(params.state) : '';
+    setStateName(decodedStateName);
+    
     async function fetchData() {
       setLoading(true);
       setError(null);
-      if (!stateName) {
+      if (!decodedStateName) {
           setError("State not specified.");
           setLoading(false);
           return;
       }
       try {
         const allData = await fetchMarketData(5000); 
-        const stateData = allData.filter(record => record.state === stateName);
+        const stateData = allData.filter(record => record.state === decodedStateName);
         setData(stateData);
       } catch (err) {
         if (err instanceof Error) {
@@ -68,7 +71,7 @@ export default function StateMarketWatchPage({ params }: { params: { state: stri
     }
 
     fetchData();
-  }, [stateName, t]);
+  }, [params.state, t]);
 
   return (
     <div className="container mx-auto py-8 px-4 md:px-6">
