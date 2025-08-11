@@ -1,25 +1,46 @@
 
 'use client';
+import { useEffect, useState } from 'react';
 import { PageHeader, PageHeaderHeading, PageHeaderDescription } from '@/components/page-header';
+import { MarketWatchTable } from '@/components/market-watch-table';
+import { Skeleton } from '@/components/ui/skeleton';
 import { useTranslation } from '@/hooks/use-translation';
-import { Card } from '@/components/ui/card';
-import Link from 'next/link';
-import { ChevronRight } from 'lucide-react';
+import { getAllMarketData } from '@/ai/flows/market-data';
+import type { MarketData } from '@/ai/flows/market-data';
 
 const texts = {
   title: "Market Watch",
-  description: "Select a state to view daily Mandi prices for vegetables, grains, and other crops.",
+  description: "Daily Mandi prices for vegetables, grains, and other crops across all states.",
+  fetchError: "Failed to fetch market data. The external API might be temporarily unavailable. Please try again later.",
 };
 
-const indianStates = [
-  "Andhra Pradesh", "Arunachal Pradesh", "Assam", "Bihar", "Chhattisgarh", "Goa", "Gujarat", "Haryana", "Himachal Pradesh",
-  "Jharkhand", "Karnataka", "Kerala", "Madhya Pradesh", "Maharashtra", "Manipur", "Meghalaya", "Mizoram", "Nagaland",
-  "Odisha", "Punjab", "Rajasthan", "Sikkim", "Tamil Nadu", "Telangana", "Tripura", "Uttar Pradesh", "Uttarakhand", "West Bengal", "National Capital Territory of Delhi"
-];
-
-
 export default function MarketWatchPage() {
+  const [data, setData] = useState<MarketData[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const { t } = useTranslation(texts);
+
+  useEffect(() => {
+    async function fetchData() {
+      setLoading(true);
+      setError(null);
+      try {
+        const allData = await getAllMarketData();
+        setData(allData);
+      } catch (err) {
+        if (err instanceof Error) {
+          setError(t('fetchError'));
+        } else {
+          setError('An unknown error occurred.');
+        }
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchData();
+  }, [t]);
 
   return (
     <div className="container mx-auto py-8 px-4 md:px-6">
@@ -29,15 +50,20 @@ export default function MarketWatchPage() {
           {t('description')}
         </PageHeaderDescription>
       </PageHeader>
-      <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-        {indianStates.map((state) => (
-          <Link href={`/market-watch/${encodeURIComponent(state)}`} key={state} passHref>
-            <Card className="p-4 flex items-center justify-between hover:bg-muted/50 transition-colors">
-              <span className="font-medium">{state}</span>
-              <ChevronRight className="h-4 w-4 text-muted-foreground" />
-            </Card>
-          </Link>
-        ))}
+      <div className="mt-8">
+        {loading ? (
+          <div className="space-y-2">
+            <Skeleton className="h-12 w-full" />
+            <Skeleton className="h-12 w-full" />
+            <Skeleton className="h-12 w-full" />
+            <Skeleton className="h-12 w-full" />
+            <Skeleton className="h-12 w-full" />
+          </div>
+        ) : error ? (
+          <div className="text-destructive text-center">{error}</div>
+        ) : (
+          <MarketWatchTable data={data} />
+        )}
       </div>
     </div>
   );

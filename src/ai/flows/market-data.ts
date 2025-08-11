@@ -4,6 +4,7 @@
  * @fileOverview A flow for fetching market data.
  *
  * - getMarketData - A function that fetches market data for a given state.
+ * - getAllMarketData - A function that fetches market data for all states.
  * - GetMarketDataInput - The input type for the getMarketData function.
  * - MarketData - The type for a single market data record.
  */
@@ -73,6 +74,17 @@ async function fetchMarketDataByState(state: string, limit: number = 2000): Prom
   return (result as any).records;
 }
 
+async function fetchAllMarketData(limit: number = 2000): Promise<MarketData[]> {
+  const apiKey = process.env.MARKET_DATA_API_KEY || '579b464db66ec23bdd0000018dbacdbba277486960fe9772d8ab4efb';
+  const url = `https://api.data.gov.in/resource/9ef84268-d588-465a-a308-a864a43d0070?api-key=${apiKey}&format=json&limit=${limit}`;
+  
+  const result = await fetchWithTimeout(url);
+  if (!result || !Array.isArray((result as any).records)) {
+    console.warn("Market data API returned an unexpected response format:", result);
+    return [];
+  }
+  return (result as any).records;
+}
 
 export async function getMarketData(
   input: GetMarketDataInput
@@ -80,6 +92,9 @@ export async function getMarketData(
   return getMarketDataFlow(input);
 }
 
+export async function getAllMarketData(): Promise<MarketData[]> {
+    return getAllMarketDataFlow();
+}
 
 const getMarketDataFlow = ai.defineFlow(
   {
@@ -89,6 +104,18 @@ const getMarketDataFlow = ai.defineFlow(
   },
   async ({ state }) => {
     const marketData = await fetchMarketDataByState(state);
+    return marketData;
+  }
+);
+
+
+const getAllMarketDataFlow = ai.defineFlow(
+  {
+    name: 'getAllMarketDataFlow',
+    outputSchema: z.array(MarketDataSchema),
+  },
+  async () => {
+    const marketData = await fetchAllMarketData();
     return marketData;
   }
 );
