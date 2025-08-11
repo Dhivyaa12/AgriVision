@@ -6,7 +6,19 @@ import { MarketWatchTable } from '@/components/market-watch-table';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useTranslation } from '@/hooks/use-translation';
 import { getAllMarketData } from '@/ai/flows/market-data';
-import type { MarketData } from '@/ai/flows/market-data';
+
+// Define the MarketData type locally as it's not exported from the flow
+type MarketData = {
+  state: string;
+  district: string;
+  market: string;
+  commodity: string;
+  variety: string;
+  arrival_date: string;
+  min_price: string;
+  max_price: string;
+  modal_price: string;
+};
 
 const texts = {
   title: "Market Watch",

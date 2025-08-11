@@ -12,7 +12,7 @@
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
 
-export const MarketDataSchema = z.object({
+const MarketDataSchema = z.object({
   state: z.string(),
   district: z.string(),
   market: z.string(),
@@ -119,4 +119,3 @@ const getAllMarketDataFlow = ai.defineFlow(
     return marketData;
   }
 );
-
