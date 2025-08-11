@@ -24,6 +24,7 @@ export type MarketData = {
 };
 
 async function fetchWithTimeout(url: string, options: any = {}, timeout = 15000) {
+  const fetch = (await import('node-fetch')).default;
   try {
     console.log(`Fetching URL: ${url}`);
     const controller = new AbortController();
@@ -31,7 +32,7 @@ async function fetchWithTimeout(url: string, options: any = {}, timeout = 15000)
 
     const response = await fetch(url, {
       ...options,
-      signal: controller.signal,
+      signal: controller.signal as any,
     });
 
     clearTimeout(id);

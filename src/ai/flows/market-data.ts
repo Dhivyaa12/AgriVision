@@ -32,13 +32,14 @@ export type GetMarketDataInput = z.infer<typeof GetMarketDataInputSchema>;
 
 
 async function fetchWithTimeout(url: string, options: any = {}, timeout = 15000) {
+  const fetch = (await import('node-fetch')).default;
   try {
     const controller = new AbortController();
     const id = setTimeout(() => controller.abort(), timeout);
 
     const response = await fetch(url, {
       ...options,
-      signal: controller.signal,
+      signal: controller.signal as any,
     });
 
     clearTimeout(id);
