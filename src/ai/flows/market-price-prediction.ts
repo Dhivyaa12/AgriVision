@@ -5,7 +5,7 @@
  *
  * - predictMarketPrice - A function that handles the price prediction process.
  * - MarketPricePredictionInput - The input type for the predictMarketPrice function.
- * - MarketPricePredictionOutput - The return type for the predictMarket_price function.
+ * - MarketPricePredictionOutput - The return type for the predict_price function.
  */
 
 import {ai} from '@/ai/genkit';
