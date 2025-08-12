@@ -24,6 +24,7 @@ const texts = {
   title: "Market Watch",
   description: "Daily Mandi prices for vegetables, grains, and other crops across all states.",
   fetchError: "Failed to fetch market data. The external API might be temporarily unavailable or has returned an empty list. Please try again later.",
+  timeoutError: "The request to the market data API timed out. This may be due to high load on the external server. Please try again in a few moments."
 };
 
 export default function MarketWatchPage() {
@@ -45,7 +46,11 @@ export default function MarketWatchPage() {
         }
       } catch (err) {
         if (err instanceof Error) {
-          setError(`${t('fetchError')} Error: ${err.message}`);
+          if (err.message.includes('timed out')) {
+            setError(t('timeoutError'));
+          } else {
+            setError(`${t('fetchError')} Error: ${err.message}`);
+          }
         } else {
           setError('An unknown error occurred.');
         }
