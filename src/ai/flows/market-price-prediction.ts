@@ -10,67 +10,20 @@
 
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
+import { getAllMarketData } from './market-data';
 
 export type MarketData = {
-  state: string;
-  district: string;
-  market: string;
-  commodity: string;
-  variety: string;
-  arrival_date: string;
-  min_price: string;
-  max_price: string;
-  modal_price: string;
+  state: string | null;
+  district: string | null;
+  market: string | null;
+  commodity: string | null;
+  variety: string | null;
+  arrival_date: string | null;
+  min_price: string | null;
+  max_price: string | null;
+  modal_price: string | null;
 };
 
-async function fetchWithTimeout(url: string, options: any = {}, timeout = 30000) {
-  const fetch = (await import('node-fetch')).default;
-  try {
-    console.log(`Fetching URL: ${url}`);
-    const controller = new AbortController();
-    const id = setTimeout(() => controller.abort(), timeout);
-
-    const response = await fetch(url, {
-      ...options,
-      signal: controller.signal as any,
-    });
-
-    clearTimeout(id);
-
-    if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(`Failed to fetch market data. Status: ${response.status}. Body: ${errorText}`);
-    }
-    
-    return response.json();
-
-  } catch (error: any) {
-    if (error.name === 'AbortError') {
-      throw new Error('Request to market data API timed out.');
-    }
-    if (error.message.includes('fetch failed')) {
-        throw new Error('A network error occurred. This may be due to restrictions in the development environment that block outbound API calls. Consider using a proxy or serverless function to access the external API.');
-    }
-    console.error("Fetch error:", error);
-    throw new Error(`A network error occurred: ${error.message}`);
-  }
-}
-
-
-async function fetchAllMarketData(limit: number = 2000): Promise<MarketData[]> {
-  const apiKey = process.env.MARKET_DATA_API_KEY;
-   if (!apiKey) {
-      throw new Error("MARKET_DATA_API_KEY is not set in the environment variables.");
-  }
-  const url = `https://api.data.gov.in/resource/9ef84268-d588-465a-a308-a864a43d0070?api-key=${apiKey}&format=json&limit=${limit}`;
-  
-  const result = await fetchWithTimeout(url);
-  if (!result || !Array.isArray((result as any).records)) {
-    console.warn("Market data API returned an unexpected response format:", result);
-    return [];
-  }
-  return (result as any).records;
-}
 
 const MarketPricePredictionInputSchema = z.object({
   commodity: z.string().describe('A description from the user about the commodity they want a price prediction for. This could be a simple name like "Paddy" or a more descriptive sentence like "I want to know the price for high-quality wheat in Punjab".'),
@@ -180,8 +133,8 @@ const predictMarketPriceFlow = ai.defineFlow(
     outputSchema: MarketPricePredictionOutputSchema,
   },
   async ({ commodity: description }) => {
-    const allData = await fetchAllMarketData(2000); 
-    const uniqueCommodities = [...new Set(allData.map(item => item.commodity))];
+    const allData = await getAllMarketData();
+    const uniqueCommodities = [...new Set(allData.map(item => item.commodity).filter(c => c) as string[])];
 
     const { output: identifiedCommodity } = await commodityIdentifierPrompt({
         description,
@@ -194,7 +147,7 @@ const predictMarketPriceFlow = ai.defineFlow(
     
     const commodityToAnalyze = identifiedCommodity.commodity;
 
-    const commodityData = allData.filter(item => item.commodity.toLowerCase() === commodityToAnalyze.toLowerCase());
+    const commodityData = allData.filter(item => item.commodity && item.commodity.toLowerCase() === commodityToAnalyze.toLowerCase());
 
     if (commodityData.length === 0) {
       throw new Error(`No market data found for commodity: ${commodityToAnalyze}. It might be a rare commodity or the data is not available in the recent records.`);
