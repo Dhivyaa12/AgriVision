@@ -9,21 +9,21 @@ import { getAllMarketData } from '@/ai/flows/market-data';
 
 // Define the MarketData type locally as it's not exported from the flow
 type MarketData = {
-  state: string;
-  district: string;
-  market: string;
-  commodity: string;
-  variety: string;
-  arrival_date: string;
-  min_price: string;
-  max_price: string;
-  modal_price: string;
+  state: string | null;
+  district: string | null;
+  market: string | null;
+  commodity: string | null;
+  variety: string | null;
+  arrival_date: string | null;
+  min_price: string | null;
+  max_price: string | null;
+  modal_price: string | null;
 };
 
 const texts = {
   title: "Market Watch",
   description: "Daily Mandi prices for vegetables, grains, and other crops across all states.",
-  fetchError: "Failed to fetch market data. The external API might be temporarily unavailable. Please try again later.",
+  fetchError: "Failed to fetch market data. The external API might be temporarily unavailable or has returned an empty list. Please try again later.",
 };
 
 export default function MarketWatchPage() {
@@ -38,10 +38,14 @@ export default function MarketWatchPage() {
       setError(null);
       try {
         const allData = await getAllMarketData();
-        setData(allData);
+        if (allData && allData.length > 0) {
+            setData(allData);
+        } else {
+            setError(t('fetchError'));
+        }
       } catch (err) {
         if (err instanceof Error) {
-          setError(t('fetchError'));
+          setError(`${t('fetchError')} Error: ${err.message}`);
         } else {
           setError('An unknown error occurred.');
         }
@@ -72,7 +76,7 @@ export default function MarketWatchPage() {
             <Skeleton className="h-12 w-full" />
           </div>
         ) : error ? (
-          <div className="text-destructive text-center">{error}</div>
+          <div className="text-destructive text-center p-4 border border-destructive/50 rounded-md bg-destructive/10">{error}</div>
         ) : (
           <MarketWatchTable data={data} />
         )}

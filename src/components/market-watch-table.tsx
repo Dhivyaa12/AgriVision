@@ -22,15 +22,15 @@ import { useTranslation } from '@/hooks/use-translation';
 
 
 type MarketData = {
-  state: string;
-  district: string;
-  market: string;
-  commodity: string;
-  variety: string;
-  arrival_date: string;
-  min_price: string;
-  max_price: string;
-  modal_price: string;
+  state: string | null;
+  district: string | null;
+  market: string | null;
+  commodity: string | null;
+  variety: string | null;
+  arrival_date: string | null;
+  min_price: string | null;
+  max_price: string | null;
+  modal_price: string | null;
 };
 
 interface MarketWatchTableProps {
@@ -61,28 +61,33 @@ export function MarketWatchTable({ data }: MarketWatchTableProps) {
     {
       accessorKey: 'commodity',
       header: t('commodity'),
+      cell: info => info.getValue() || 'N/A',
     },
     {
       accessorKey: 'variety',
       header: t('variety'),
+      cell: info => info.getValue() || 'N/A',
     },
     {
       accessorKey: 'market',
       header: t('market'),
+      cell: info => info.getValue() || 'N/A',
     },
     {
       accessorKey: 'district',
       header: t('district'),
+      cell: info => info.getValue() || 'N/A',
     },
     {
       accessorKey: 'state',
       header: t('state'),
+      cell: info => info.getValue() || 'N/A',
     },
     {
       accessorKey: 'modal_price',
       header: () => <div className="text-right">{t('modalPrice')}</div>,
       cell: ({ row }) => {
-        const amount = parseFloat(row.getValue('modal_price'));
+        const amount = parseFloat(row.getValue('modal_price') || '0');
         const formatted = new Intl.NumberFormat('en-IN').format(amount);
         return <div className="text-right font-medium">{formatted}</div>;
       },
@@ -111,7 +116,7 @@ export function MarketWatchTable({ data }: MarketWatchTableProps) {
   });
 
   const districts = React.useMemo(() => {
-    const uniqueDistricts = [...new Set(data.map(item => item.district))];
+    const uniqueDistricts = [...new Set(data.map(item => item.district).filter(Boolean) as string[])];
     return uniqueDistricts.sort();
   }, [data]);
 
