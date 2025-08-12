@@ -23,7 +23,7 @@ export type MarketData = {
   modal_price: string;
 };
 
-async function fetchWithTimeout(url: string, options: any = {}, timeout = 15000) {
+async function fetchWithTimeout(url: string, options: any = {}, timeout = 20000) {
   const fetch = (await import('node-fetch')).default;
   try {
     console.log(`Fetching URL: ${url}`);
@@ -214,3 +214,4 @@ const predictMarketPriceFlow = ai.defineFlow(
     return structuredOutput!;
   }
 );
+

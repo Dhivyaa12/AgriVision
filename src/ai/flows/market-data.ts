@@ -23,7 +23,7 @@ const MarketDataSchema = z.object({
 type MarketData = z.infer<typeof MarketDataSchema>;
 
 
-async function fetchWithTimeout(url: string, options: any = {}, timeout = 15000) {
+async function fetchWithTimeout(url: string, options: any = {}, timeout = 20000) {
   const fetch = (await import('node-fetch')).default;
   try {
     const controller = new AbortController();
@@ -84,3 +84,4 @@ const getAllMarketDataFlow = ai.defineFlow(
     return marketData;
   }
 );
+
