@@ -45,8 +45,14 @@ async function fetchWithRetry(url: string, retries = 3, delay = 2000, timeout = 
         throw new Error(`Failed to fetch market data. Status: ${response.status}. Body: ${errorText}`);
       }
       
-      const result = await response.json();
-      return result;
+      const resultText = await response.text();
+      try {
+        const result = JSON.parse(resultText);
+        return result;
+      } catch (e) {
+        console.error("Failed to parse JSON from API response. Response text:", resultText);
+        throw new Error("The market data API returned an invalid (non-JSON) response.");
+      }
 
     } catch (error: any) {
       clearTimeout(id);
