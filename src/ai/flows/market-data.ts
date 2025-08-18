@@ -84,7 +84,7 @@ async function fetchWithRetry(url: string, retries = 3, delay = 2000): Promise<a
 }
 
 
-async function fetchAllMarketData(limit: number = 2500): Promise<MarketData[]> {
+async function fetchAllMarketData(limit: number = 1000): Promise<MarketData[]> {
   const now = Date.now();
   if (marketDataCache.data && (now - marketDataCache.lastUpdated) < CACHE_TTL) {
       console.log("Returning market data from cache.");
@@ -92,7 +92,7 @@ async function fetchAllMarketData(limit: number = 2500): Promise<MarketData[]> {
   }
 
   const apiKey = process.env.MARKET_DATA_API_KEY || '579b464db66ec23bdd00000158e40da4227b42ab4386870895cbbb50';
-  const url = `https://api.data.gov.in/resource/e0786f4b-2856-4339-9540-5a3dcf193e82?api-key=${apiKey}&format=json&limit=${limit}`;
+  const url = `https://api.data.gov.in/resource/9ef84268-d588-465a-a308-a864a43d0070?api-key=${apiKey}&format=json&limit=${limit}`;
 
   try {
     const result = await fetchWithRetry(url);
@@ -127,7 +127,7 @@ const getAllMarketDataFlow = ai.defineFlow(
     outputSchema: z.array(MarketDataSchema),
   },
   async () => {
-    const marketData = await fetchAllMarketData(2500);
+    const marketData = await fetchAllMarketData(1000);
     return marketData;
   }
 );
