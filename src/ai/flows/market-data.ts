@@ -30,19 +30,30 @@ let marketDataCache: {
   lastUpdated: 0,
 };
 
-const CACHE_TTL = 1000 * 60; // 60 seconds
+const CACHE_TTL = 1000 * 60 * 5; // 5 minutes
 
 async function fetchWithTimeout(url: string, options: RequestInit & { timeout?: number } = {}) {
-  const { timeout = 20000 } = options; // 20-second timeout
+  const { timeout = 30000 } = options; // 30-second timeout
   const controller = new AbortController();
   const id = setTimeout(() => controller.abort(), timeout);
 
-  const response = await fetch(url, {
-    ...options,
-    signal: controller.signal,
-  });
-  clearTimeout(id);
-  return response;
+  try {
+      const response = await fetch(url, {
+        ...options,
+        signal: controller.signal,
+      });
+      return response;
+  } catch (error: any) {
+    if (error.name === 'AbortError') {
+      throw new Error('Request to market data API timed out.');
+    }
+    if (error.message.includes('fetch failed')) {
+        throw new Error('A network error occurred. This may be due to restrictions in the development environment that block outbound API calls. Consider using a proxy or serverless function to access the external API.');
+    }
+    throw error;
+  } finally {
+      clearTimeout(id);
+  }
 }
 
 async function fetchWithRetry(url: string, retries = 3, delay = 2000): Promise<any> {
@@ -73,7 +84,7 @@ async function fetchWithRetry(url: string, retries = 3, delay = 2000): Promise<a
 }
 
 
-async function fetchAllMarketData(limit: number = 2000): Promise<MarketData[]> {
+async function fetchAllMarketData(limit: number = 2500): Promise<MarketData[]> {
   const now = Date.now();
   if (marketDataCache.data && (now - marketDataCache.lastUpdated) < CACHE_TTL) {
       console.log("Returning market data from cache.");
@@ -116,7 +127,7 @@ const getAllMarketDataFlow = ai.defineFlow(
     outputSchema: z.array(MarketDataSchema),
   },
   async () => {
-    const marketData = await fetchAllMarketData(2000);
+    const marketData = await fetchAllMarketData(2500);
     return marketData;
   }
 );
