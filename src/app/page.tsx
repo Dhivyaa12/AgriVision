@@ -1,3 +1,4 @@
+
 'use client';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -20,6 +21,13 @@ const featuresData = {
     description: "Get personalized crop recommendations based on your soil, weather, and location.",
     href: "/crop-recommendation",
     cta: "Get Recommendation",
+  },
+   marketWatch: {
+    icon: LineChart,
+    title: "Market Watch",
+    description: "View real-time Mandi prices for various agricultural commodities across the country.",
+    href: "/market-watch",
+    cta: "View Prices",
   },
   marketAnalyser: {
     icon: TrendingUp,
