@@ -6,6 +6,7 @@ import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, Tabl
 import { getAllMarketData } from '@/ai/flows/market-data';
 import { Loader2 } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from './ui/alert';
+import { useTranslation } from '@/hooks/use-translation';
 
 type MarketData = {
   state: string | null;
@@ -19,11 +20,29 @@ type MarketData = {
   modal_price: string | null;
 };
 
+const texts = {
+  caption: "Daily Price Updates of Crops",
+  commodity: "Commodity",
+  state: "State",
+  district: "District",
+  market: "Market",
+  variety: "Variety",
+  arrivalDate: "Arrival Date",
+  minPrice: "Min Price (₹)",
+  maxPrice: "Max Price (₹)",
+  modalPrice: "Modal Price (₹)",
+  errorTitle: "Error Fetching Data",
+  errorDescription: "Could not retrieve market data at this time. Please try again later.",
+  noData: "No market data available.",
+};
+
 
 const MarketWatchTable: React.FC = () => {
   const [marketData, setMarketData] = useState<MarketData[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const { t } = useTranslation(texts);
+
 
   useEffect(() => {
     const getData = async () => {
@@ -54,9 +73,9 @@ const MarketWatchTable: React.FC = () => {
   if (error) {
     return (
         <Alert variant="destructive">
-          <AlertTitle>Error Fetching Data</AlertTitle>
+          <AlertTitle>{t('errorTitle')}</AlertTitle>
           <AlertDescription>
-            Could not retrieve market data at this time. Please try again later.
+            {t('errorDescription')}
             <p className="text-xs mt-2 font-mono">{error}</p>
           </AlertDescription>
         </Alert>
@@ -64,23 +83,23 @@ const MarketWatchTable: React.FC = () => {
   }
 
   if (marketData.length === 0) {
-    return <p>No market data available.</p>;
+    return <p>{t('noData')}</p>;
   }
 
   return (
     <Table>
-      <TableCaption>Daily Price Updates of Crops</TableCaption>
+      <TableCaption>{t('caption')}</TableCaption>
       <TableHeader>
         <TableRow>
-          <TableHead>Commodity</TableHead>
-          <TableHead>State</TableHead>
-          <TableHead>District</TableHead>
-          <TableHead>Market</TableHead>
-          <TableHead>Variety</TableHead>
-          <TableHead>Arrival Date</TableHead>
-          <TableHead>Min Price (₹)</TableHead>
-          <TableHead>Max Price (₹)</TableHead>
-          <TableHead>Modal Price (₹)</TableHead>
+          <TableHead>{t('commodity')}</TableHead>
+          <TableHead>{t('state')}</TableHead>
+          <TableHead>{t('district')}</TableHead>
+          <TableHead>{t('market')}</TableHead>
+          <TableHead>{t('variety')}</TableHead>
+          <TableHead>{t('arrivalDate')}</TableHead>
+          <TableHead>{t('minPrice')}</TableHead>
+          <TableHead>{t('maxPrice')}</TableHead>
+          <TableHead>{t('modalPrice')}</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
