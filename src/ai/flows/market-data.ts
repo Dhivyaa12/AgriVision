@@ -91,7 +91,7 @@ async function fetchAllMarketData(limit: number = 2500): Promise<MarketData[]> {
       return marketDataCache.data;
   }
 
-  const apiKey = process.env.MARKET_DATA_API_KEY || '579b464db66ec23bdd0000018dbacdbba277486960fe9772d8ab4efb';
+  const apiKey = process.env.MARKET_DATA_API_KEY || '579b464db66ec23bdd00000158e40da4227b42ab4386870895cbbb50';
   const url = `https://api.data.gov.in/resource/e0786f4b-2856-4339-9540-5a3dcf193e82?api-key=${apiKey}&format=json&limit=${limit}`;
 
   try {
