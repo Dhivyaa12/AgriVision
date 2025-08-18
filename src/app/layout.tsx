@@ -40,7 +40,6 @@ const texts = {
   dashboard: "Dashboard",
   cropDiagnosis: "Crop Diagnosis",
   cropRecommendation: "Crop Recommendation",
-  marketWatch: "Market Watch",
   marketAnalyser: "Market Analyser",
   sensorAnalysis: "Sensor Analysis",
   governmentSchemes: "Government Schemes",
@@ -100,14 +99,6 @@ function AppLayout({ children }: { children: React.ReactNode }) {
                 <SidebarMenuButton tooltip={t('cropRecommendation')}>
                   <Sprout />
                   <span>{t('cropRecommendation')}</span>
-                </SidebarMenuButton>
-              </Link>
-            </SidebarMenuItem>
-            <SidebarMenuItem>
-              <Link href="/market-watch" passHref>
-                <SidebarMenuButton tooltip={t('marketWatch')}>
-                  <LineChart />
-                  <span>{t('marketWatch')}</span>
                 </SidebarMenuButton>
               </Link>
             </SidebarMenuItem>

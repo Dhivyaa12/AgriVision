@@ -21,13 +21,6 @@ const featuresData = {
     href: "/crop-recommendation",
     cta: "Get Recommendation",
   },
-  marketWatch: {
-    icon: LineChart,
-    title: "Market Watch",
-    description: "Stay updated with the latest Mandi prices for various crops and make informed selling decisions.",
-    href: "/market-watch",
-    cta: "View Prices",
-  },
   marketAnalyser: {
     icon: TrendingUp,
     title: "Market Analyser",
