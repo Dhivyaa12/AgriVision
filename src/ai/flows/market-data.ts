@@ -57,7 +57,6 @@ async function fetchWithRetry(url: string, retries = 3, delay = 2000): Promise<a
                 const result = await response.json();
                 return result;
             } catch (e) {
-                // If parsing fails, the body is not valid JSON.
                 const rawText = await response.text();
                 console.error("Failed to parse JSON response. Raw body:", rawText);
                 throw new Error("An unexpected response was received from the server (not valid JSON).");

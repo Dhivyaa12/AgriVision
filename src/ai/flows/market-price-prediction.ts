@@ -12,19 +12,6 @@ import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
 import { getAllMarketData } from './market-data';
 
-export type MarketData = {
-  state: string | null;
-  district: string | null;
-  market: string | null;
-  commodity: string | null;
-  variety: string | null;
-  arrival_date: string | null;
-  min_price: string | null;
-  max_price: string | null;
-  modal_price: string | null;
-};
-
-
 const MarketPricePredictionInputSchema = z.object({
   commodity: z.string().describe('A description from the user about the commodity they want a price prediction for. This could be a simple name like "Paddy" or a more descriptive sentence like "I want to know the price for high-quality wheat in Punjab".'),
 });
