@@ -45,6 +45,9 @@ async function fetchAllMarketData(limit: number = 2000): Promise<MarketData[]> {
     return (result as any).records;
   } catch (error: any) {
     console.error("Error fetching market data:", error);
+    if (error.message.includes('invalid json')) {
+        throw new Error('An unexpected response was received from the server. It was not valid JSON.');
+    }
     throw new Error(`A network error occurred while fetching market data: ${error.message}`);
   }
 }
