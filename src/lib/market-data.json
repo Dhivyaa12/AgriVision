@@ -1,0 +1,112 @@
+[
+    {
+        "state": "Gujarat",
+        "district": "Amreli",
+        "market": "Damnagar",
+        "commodity": "Guar",
+        "variety": "Gwar",
+        "arrival_date": "19/08/2025",
+        "min_price": "2800",
+        "max_price": "3500",
+        "modal_price": "3200"
+    },
+    {
+        "state": "Gujarat",
+        "district": "Surendranagar",
+        "market": "Chotila",
+        "commodity": "Wheat",
+        "variety": "Local",
+        "arrival_date": "19/08/2025",
+        "min_price": "2250",
+        "max_price": "2650",
+        "modal_price": "2450"
+    },
+    {
+        "state": "Haryana",
+        "district": "Gurgaon",
+        "market": "Gurgaon",
+        "commodity": "Cauliflower",
+        "variety": "Other",
+        "arrival_date": "19/08/2025",
+        "min_price": "2000",
+        "max_price": "3000",
+        "modal_price": "2500"
+    },
+    {
+        "state": "Haryana",
+        "district": "Gurgaon",
+        "market": "Gurgaon",
+        "commodity": "Potato",
+        "variety": "Other",
+        "arrival_date": "19/08/2025",
+        "min_price": "1000",
+        "max_price": "1400",
+        "modal_price": "1200"
+    },
+    {
+        "state": "Himachal Pradesh",
+        "district": "Kangra",
+        "market": "Dharamshala",
+        "commodity": "Bitter gourd",
+        "variety": "Other",
+        "arrival_date": "19/08/2025",
+        "min_price": "3000",
+        "max_price": "4000",
+        "modal_price": "3500"
+    },
+    {
+        "state": "Himachal Pradesh",
+        "district": "Kangra",
+        "market": "Dharamshala",
+        "commodity": "Brinjal",
+        "variety": "Other",
+        "arrival_date": "19/08/2025",
+        "min_price": "2600",
+        "max_price": "3000",
+        "modal_price": "2800"
+    },
+    {
+        "state": "Himachal Pradesh",
+        "district": "Kangra",
+        "market": "Dharamshala",
+        "commodity": "Mousambi(Sweet Lime)",
+        "variety": "Other",
+        "arrival_date": "19/08/2025",
+        "min_price": "4800",
+        "max_price": "5500",
+        "modal_price": "5150"
+    },
+    {
+        "state": "Karnataka",
+        "district": "Bangalore",
+        "market": "Bangalore",
+        "commodity": "Tomato",
+        "variety": "Hybrid",
+        "arrival_date": "18/08/2025",
+        "min_price": "2500",
+        "max_price": "3000",
+        "modal_price": "2800"
+    },
+    {
+        "state": "Maharashtra",
+        "district": "Pune",
+        "market": "Pune",
+        "commodity": "Onion",
+        "variety": "Red",
+        "arrival_date": "18/08/2025",
+        "min_price": "1200",
+        "max_price": "1800",
+        "modal_price": "1500"
+    },
+    {
+        "state": "Punjab",
+        "district": "Ludhiana",
+        "market": "Ludhiana",
+        "commodity": "Paddy",
+        "variety": "Basmati",
+        "arrival_date": "18/08/2025",
+        "min_price": "3200",
+        "max_price": "3800",
+        "modal_price": "3500"
+    }
+]

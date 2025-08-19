@@ -7,6 +7,7 @@
 
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
+import localMarketData from '@/lib/market-data.json';
 
 const MarketDataSchema = z.object({
   state: z.string().nullable(),
@@ -28,7 +29,7 @@ const CACHE_DURATION = 60 * 1000; // 1 minute
 async function fetchAllMarketData(): Promise<MarketData[]> {
   const apiKey = process.env.DATA_GOV_API_KEY || '579b464db66ec23bdd000001cdd3946e44ce4aad7209ff7b23ac571b';
   const resourceId = '9ef84268-d588-465a-a308-a864a43d0070';
-  const url = `https://api.data.gov.in/resource/${resourceId}?api-key=${apiKey}&format=json&limit=100`;
+  const url = `https://api.data.gov.in/resource/${resourceId}?api-key=${apiKey}&format=json&limit=1000`;
 
   const response = await fetch(url);
 
@@ -72,8 +73,8 @@ const getAllMarketDataFlow = ai.defineFlow(
       return data;
     } catch (error: any) {
         console.error("Failed to fetch live data, falling back to local data.", error);
-        // Fallback to empty array if live fetch fails
-        return [];
+        // Fallback to local data if live fetch fails
+        return localMarketData as MarketData[];
     }
   }
 );
