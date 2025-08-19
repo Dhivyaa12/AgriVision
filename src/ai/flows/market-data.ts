@@ -33,7 +33,7 @@ let marketDataCache: {
 const CACHE_TTL = 1000 * 60 * 5; // 5 minutes
 
 async function fetchWithTimeout(url: string, options: RequestInit & { timeout?: number } = {}) {
-  const { timeout = 30000 } = options; // 30-second timeout
+  const { timeout = 20000 } = options; // 20-second timeout
   const controller = new AbortController();
   const id = setTimeout(() => controller.abort(), timeout);
 
@@ -84,7 +84,7 @@ async function fetchWithRetry(url: string, retries = 3, delay = 2000): Promise<a
 }
 
 
-async function fetchAllMarketData(limit: number = 1000): Promise<MarketData[]> {
+async function fetchAllMarketData(limit: number = 100): Promise<MarketData[]> {
   const now = Date.now();
   if (marketDataCache.data && (now - marketDataCache.lastUpdated) < CACHE_TTL) {
       console.log("Returning market data from cache.");
@@ -127,7 +127,7 @@ const getAllMarketDataFlow = ai.defineFlow(
     outputSchema: z.array(MarketDataSchema),
   },
   async () => {
-    const marketData = await fetchAllMarketData(1000);
+    const marketData = await fetchAllMarketData(100);
     return marketData;
   }
 );
