@@ -1,7 +1,7 @@
 
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { getAllMarketData } from '@/ai/flows/market-data';
 import { Loader2, ArrowLeft, ArrowRight } from 'lucide-react';
@@ -21,6 +21,10 @@ type MarketData = {
   modal_price: string | null;
 };
 
+interface MarketWatchTableProps {
+  selectedState: string | null;
+}
+
 const texts = {
   caption: "Daily Price Updates of Crops",
   commodity: "Commodity",
@@ -35,14 +39,15 @@ const texts = {
   errorTitle: "Error Fetching Data",
   errorDescription: "Could not retrieve market data at this time. Please try again later.",
   noData: "No market data available.",
+  noDataForState: "No market data available for the selected state.",
   page: "Page",
   previous: "Previous",
   next: "Next"
 };
 
 
-const MarketWatchTable: React.FC = () => {
-  const [marketData, setMarketData] = useState<MarketData[]>([]);
+const MarketWatchTable: React.FC<MarketWatchTableProps> = ({ selectedState }) => {
+  const [allMarketData, setAllMarketData] = useState<MarketData[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
@@ -56,7 +61,7 @@ const MarketWatchTable: React.FC = () => {
         setLoading(true);
         setError(null);
         const data = await getAllMarketData();
-        setMarketData(data);
+        setAllMarketData(data);
       } catch (err: any) {
         console.error("Error fetching market data:", err);
         setError(err.message || "An unknown error occurred while fetching market data.");
@@ -68,10 +73,23 @@ const MarketWatchTable: React.FC = () => {
     getData();
   }, []);
 
-  const totalPages = Math.ceil(marketData.length / rowsPerPage);
+  const filteredData = useMemo(() => {
+    if (!selectedState) {
+      return allMarketData;
+    }
+    return allMarketData.filter(item => item.state === selectedState);
+  }, [allMarketData, selectedState]);
+  
+  useEffect(() => {
+      // Reset to first page whenever filter changes
+      setCurrentPage(1);
+  }, [selectedState]);
+
+
+  const totalPages = Math.ceil(filteredData.length / rowsPerPage);
   const startIndex = (currentPage - 1) * rowsPerPage;
   const endIndex = startIndex + rowsPerPage;
-  const currentData = marketData.slice(startIndex, endIndex);
+  const currentData = filteredData.slice(startIndex, endIndex);
 
   const handlePreviousPage = () => {
     setCurrentPage((prev) => Math.max(prev - 1, 1));
@@ -101,8 +119,16 @@ const MarketWatchTable: React.FC = () => {
     );
   }
 
-  if (marketData.length === 0) {
+  if (allMarketData.length === 0) {
     return <p>{t('noData')}</p>;
+  }
+
+  if (currentData.length === 0) {
+      return (
+          <div className="text-center text-muted-foreground py-10">
+              {t('noDataForState')}
+          </div>
+      )
   }
 
   return (
@@ -125,7 +151,7 @@ const MarketWatchTable: React.FC = () => {
           </TableHeader>
           <TableBody>
             {currentData.map((data, index) => (
-              <TableRow key={index}>
+              <TableRow key={`${data.state}-${data.market}-${data.commodity}-${index}`}>
                 <TableCell className="font-medium">{data.commodity || '-'}</TableCell>
                 <TableCell>{data.state || '-'}</TableCell>
                 <TableCell className="hidden md:table-cell">{data.district || '-'}</TableCell>
@@ -140,31 +166,33 @@ const MarketWatchTable: React.FC = () => {
           </TableBody>
         </Table>
       </div>
-      <div className="flex items-center justify-between mt-4">
-        <div className="text-sm text-muted-foreground">
-          {t('page')} {currentPage} of {totalPages}
+      {totalPages > 1 && (
+        <div className="flex items-center justify-between mt-4">
+            <div className="text-sm text-muted-foreground">
+            {t('page')} {currentPage} of {totalPages}
+            </div>
+            <div className="flex items-center gap-2">
+            <Button
+                variant="outline"
+                size="sm"
+                onClick={handlePreviousPage}
+                disabled={currentPage === 1}
+            >
+                <ArrowLeft className="mr-2 h-4 w-4" />
+                {t('previous')}
+            </Button>
+            <Button
+                variant="outline"
+                size="sm"
+                onClick={handleNextPage}
+                disabled={currentPage === totalPages}
+            >
+                {t('next')}
+                <ArrowRight className="ml-2 h-4 w-4" />
+            </Button>
+            </div>
         </div>
-        <div className="flex items-center gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handlePreviousPage}
-            disabled={currentPage === 1}
-          >
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            {t('previous')}
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleNextPage}
-            disabled={currentPage === totalPages}
-          >
-            {t('next')}
-            <ArrowRight className="ml-2 h-4 w-4" />
-          </Button>
-        </div>
-      </div>
+      )}
     </>
   );
 };
