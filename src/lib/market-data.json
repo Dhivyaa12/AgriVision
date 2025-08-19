@@ -1,0 +1,168 @@
+
+[
+    {
+        "state": "NCT of Delhi",
+        "district": "Delhi",
+        "market": "Azadpur",
+        "commodity": "Potato",
+        "variety": "Other",
+        "arrival_date": "18/08/2025",
+        "min_price": "1000",
+        "max_price": "1200",
+        "modal_price": "1100"
+    },
+    {
+        "state": "Uttar Pradesh",
+        "district": "Agra",
+        "market": "Agra",
+        "commodity": "Wheat",
+        "variety": "Other",
+        "arrival_date": "18/08/2025",
+        "min_price": "2200",
+        "max_price": "2400",
+        "modal_price": "2300"
+    },
+    {
+        "state": "Maharashtra",
+        "district": "Nashik",
+        "market": "Lasalgaon",
+        "commodity": "Onion",
+        "variety": "Other",
+        "arrival_date": "18/08/2025",
+        "min_price": "1500",
+        "max_price": "1800",
+        "modal_price": "1650"
+    },
+    {
+        "state": "Karnataka",
+        "district": "Kolar",
+        "market": "Kolar",
+        "commodity": "Tomato",
+        "variety": "Other",
+        "arrival_date": "18/08/2025",
+        "min_price": "800",
+        "max_price": "1000",
+        "modal_price": "900"
+    },
+    {
+        "state": "Punjab",
+        "district": "Ludhiana",
+        "market": "Ludhiana",
+        "commodity": "Paddy(Dhan)",
+        "variety": "Basmati",
+        "arrival_date": "18/08/2025",
+        "min_price": "3500",
+        "max_price": "4000",
+        "modal_price": "3800"
+    },
+    {
+        "state": "Madhya Pradesh",
+        "district": "Indore",
+        "market": "Indore",
+        "commodity": "Soyabean",
+        "variety": "Other",
+        "arrival_date": "18/08/2025",
+        "min_price": "4500",
+        "max_price": "4800",
+        "modal_price": "4650"
+    },
+    {
+        "state": "Gujarat",
+        "district": "Rajkot",
+        "market": "Rajkot",
+        "commodity": "Cotton",
+        "variety": "Shankar",
+        "arrival_date": "18/08/2025",
+        "min_price": "7000",
+        "max_price": "7500",
+        "modal_price": "7200"
+    },
+    {
+        "state": "West Bengal",
+        "district": "Kolkata",
+        "market": "Koley Market",
+        "commodity": "Jute",
+        "variety": "TD-5",
+        "arrival_date": "18/08/2025",
+        "min_price": "5500",
+        "max_price": "6000",
+        "modal_price": "5800"
+    },
+    {
+        "state": "Andhra Pradesh",
+        "district": "Guntur",
+        "market": "Guntur",
+        "commodity": "Chilli",
+        "variety": "Red",
+        "arrival_date": "18/08/2025",
+        "min_price": "18000",
+        "max_price": "22000",
+        "modal_price": "20000"
+    },
+    {
+        "state": "Rajasthan",
+        "district": "Jaipur",
+        "market": "Jaipur(F&V)",
+        "commodity": "Mustard",
+        "variety": "Other",
+        "arrival_date": "18/08/2025",
+        "min_price": "5800",
+        "max_price": "6200",
+        "modal_price": "6000"
+    },
+    {
+        "state": "Haryana",
+        "district": "Karnal",
+        "market": "Karnal",
+        "commodity": "Paddy(Dhan)",
+        "variety": "Pusa-1121",
+        "arrival_date": "18/08/2025",
+        "min_price": "4200",
+        "max_price": "4600",
+        "modal_price": "4400"
+    },
+    {
+        "state": "Tamil Nadu",
+        "district": "Coimbatore",
+        "market": "Coimbatore",
+        "commodity": "Coconut",
+        "variety": "Other",
+        "arrival_date": "18/08/2025",
+        "min_price": "2500",
+        "max_price": "3000",
+        "modal_price": "2800"
+    },
+    {
+        "state": "Kerala",
+        "district": "Kochi",
+        "market": "Kochi",
+        "commodity": "Rubber",
+        "variety": "RSS-4",
+        "arrival_date": "18/08/2025",
+        "min_price": "16000",
+        "max_price": "16500",
+        "modal_price": "16200"
+    },
+    {
+        "state": "Assam",
+        "district": "Guwahati",
+        "market": "Pamohi",
+        "commodity": "Tea",
+        "variety": "BOP",
+        "arrival_date": "18/08/2025",
+        "min_price": "250",
+        "max_price": "350",
+        "modal_price": "300"
+    },
+    {
+        "state": "Bihar",
+        "district": "Patna",
+        "market": "Patna",
+        "commodity": "Maize",
+        "variety": "Other",
+        "arrival_date": "18/08/2025",
+        "min_price": "1900",
+        "max_price": "2100",
+        "modal_price": "2000"
+    }
+]

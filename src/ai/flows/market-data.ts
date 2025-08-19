@@ -1,12 +1,13 @@
 'use server';
 /**
- * @fileOverview A flow for fetching market data with caching and retries.
+ * @fileOverview A flow for fetching market data.
  *
- * - getAllMarketData - A function that fetches market data for all states.
+ * - getAllMarketData - A function that fetches market data.
  */
 
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
+import marketData from '@/lib/market-data.json';
 
 const MarketDataSchema = z.object({
   state: z.string().nullable(),
@@ -21,102 +22,6 @@ const MarketDataSchema = z.object({
 });
 type MarketData = z.infer<typeof MarketDataSchema>;
 
-
-let marketDataCache: {
-  data: MarketData[] | null;
-  lastUpdated: number;
-} = {
-  data: null,
-  lastUpdated: 0,
-};
-
-const CACHE_TTL = 1000 * 60 * 1; // 1 minute
-
-async function fetchWithTimeout(url: string, options: RequestInit & { timeout?: number } = {}) {
-  const { timeout = 20000 } = options; // 20-second timeout
-  const controller = new AbortController();
-  const id = setTimeout(() => controller.abort(), timeout);
-
-  try {
-      const response = await fetch(url, {
-        ...options,
-        signal: controller.signal,
-      });
-      return response;
-  } catch (error: any) {
-    if (error.name === 'AbortError') {
-      throw new Error('Request to market data API timed out.');
-    }
-     if (error.message.includes('fetch failed')) {
-        throw new Error('A network error occurred. This may be due to restrictions in the development environment that block outbound API calls. Consider using a proxy or serverless function to access the external API.');
-    }
-    throw error;
-  } finally {
-      clearTimeout(id);
-  }
-}
-
-async function fetchWithRetry(url: string, retries = 3, delay = 2000): Promise<any> {
-    for (let i = 0; i < retries; i++) {
-        try {
-            console.log(`Fetching market data... Attempt ${i + 1}`);
-            const response = await fetchWithTimeout(url);
-            if (!response.ok) {
-                throw new Error(`API returned status ${response.status}`);
-            }
-             try {
-                const result = await response.json();
-                return result;
-            } catch (e) {
-                const rawText = await response.text();
-                console.error("Failed to parse JSON response. Raw body:", rawText);
-                throw new Error("An unexpected response was received from the server (not valid JSON).");
-            }
-        } catch (error: any) {
-            console.warn(`Fetch attempt ${i + 1} failed: ${error.message}`);
-            if (i === retries - 1) {
-                console.error("All fetch attempts failed.");
-                throw error;
-            }
-            await new Promise(resolve => setTimeout(resolve, delay * (i + 1))); // Exponential backoff
-        }
-    }
-}
-
-
-async function fetchAllMarketData(limit: number = 100): Promise<MarketData[]> {
-  const now = Date.now();
-  if (marketDataCache.data && (now - marketDataCache.lastUpdated) < CACHE_TTL) {
-      console.log("Returning market data from cache.");
-      return marketDataCache.data;
-  }
-
-  const apiKey = process.env.MARKET_DATA_API_KEY || '579b464db66ec23bdd0000018dbacdbba277486960fe9772d8ab4efb';
-  const url = `https://api.data.gov.in/resource/35985678-0d79-46b4-9ed6-6f13308a1d24?api-key=${apiKey}&format=json&limit=${limit}`;
-
-  try {
-    const result = await fetchWithRetry(url);
-
-    if (!result || !Array.isArray((result as any).records)) {
-      console.warn("Market data API returned an unexpected response format:", result);
-      return [];
-    }
-    
-    marketDataCache = {
-        data: (result as any).records,
-        lastUpdated: Date.now()
-    };
-    
-    return (result as any).records;
-  } catch (error: any) {
-    console.error("Error fetching market data after all retries:", error);
-    if (error.message.includes('invalid json')) {
-        throw new Error('An unexpected response was received from the server. It was not valid JSON.');
-    }
-    throw new Error(`A network error occurred while fetching market data: ${error.message}`);
-  }
-}
-
 export async function getAllMarketData(): Promise<MarketData[]> {
     return getAllMarketDataFlow();
 }
@@ -127,7 +32,7 @@ const getAllMarketDataFlow = ai.defineFlow(
     outputSchema: z.array(MarketDataSchema),
   },
   async () => {
-    const marketData = await fetchAllMarketData(100);
-    return marketData;
+    // Return data from the local JSON file
+    return marketData as MarketData[];
   }
 );
