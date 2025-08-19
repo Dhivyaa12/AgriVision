@@ -24,7 +24,7 @@ type MarketData = z.infer<typeof MarketDataSchema>;
 
 let cachedData: MarketData[] | null = null;
 let lastFetchTime: number | null = null;
-const CACHE_DURATION = 60 * 1000; // 1 minute
+const CACHE_DURATION = 60 * 60 * 1000; // 1 hour
 
 async function fetchAllMarketData(): Promise<MarketData[]> {
   const apiKey = process.env.DATA_GOV_API_KEY || '579b464db66ec23bdd000001cdd3946e44ce4aad7209ff7b23ac571b';
@@ -63,7 +63,6 @@ async function fetchAllMarketData(): Promise<MarketData[]> {
         hasMore = false;
     }
     
-    // Break if the API returns less than the limit, indicating it's the last page.
     if (data.records.length < limit) {
         hasMore = false;
     }
@@ -94,7 +93,6 @@ const getAllMarketDataFlow = ai.defineFlow(
       return data;
     } catch (error: any) {
         console.error("Failed to fetch live data, falling back to local data.", error);
-        // Fallback to local data if live fetch fails
         return localMarketData as MarketData[];
     }
   }
