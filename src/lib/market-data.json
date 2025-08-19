@@ -108,5 +108,49 @@
         "min_price": "3200",
         "max_price": "3800",
         "modal_price": "3500"
+    },
+    {
+        "state": "Tamil Nadu",
+        "district": "Dindigul",
+        "market": "Dindigul",
+        "commodity": "Tomato",
+        "variety": "Nattu",
+        "arrival_date": "19/08/2025",
+        "min_price": "2200",
+        "max_price": "2800",
+        "modal_price": "2500"
+    },
+    {
+        "state": "Kerala",
+        "district": "Kozhikode",
+        "market": "Kozhikode",
+        "commodity": "Coconut",
+        "variety": "Other",
+        "arrival_date": "19/08/2025",
+        "min_price": "13000",
+        "max_price": "14500",
+        "modal_price": "14000"
+    },
+    {
+        "state": "Tamil Nadu",
+        "district": "Tiruchirappalli",
+        "market": "Tiruchy",
+        "commodity": "Banana",
+        "variety": "Poovan",
+        "arrival_date": "19/08/2025",
+        "min_price": "2500",
+        "max_price": "3500",
+        "modal_price": "3000"
+    },
+    {
+        "state": "Kerala",
+        "district": "Ernakulam",
+        "market": "Kochi",
+        "commodity": "Black pepper",
+        "variety": "Garbled",
+        "arrival_date": "19/08/2025",
+        "min_price": "55000",
+        "max_price": "58000",
+        "modal_price": "56500"
     }
 ]
