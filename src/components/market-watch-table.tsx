@@ -76,7 +76,7 @@ const MarketWatchTable: React.FC = () => {
           <AlertTitle>{t('errorTitle')}</AlertTitle>
           <AlertDescription>
             {t('errorDescription')}
-            <p className="text-xs mt-2 font-mono">{error}</p>
+            <p className="text-xs mt-2 font-mono bg-destructive/10 p-2 rounded">{error}</p>
           </AlertDescription>
         </Alert>
     );

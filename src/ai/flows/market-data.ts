@@ -30,7 +30,7 @@ let marketDataCache: {
   lastUpdated: 0,
 };
 
-const CACHE_TTL = 1000 * 60 * 5; // 5 minutes
+const CACHE_TTL = 1000 * 60 * 1; // 1 minute
 
 async function fetchWithTimeout(url: string, options: RequestInit & { timeout?: number } = {}) {
   const { timeout = 20000 } = options; // 20-second timeout
@@ -47,7 +47,7 @@ async function fetchWithTimeout(url: string, options: RequestInit & { timeout?: 
     if (error.name === 'AbortError') {
       throw new Error('Request to market data API timed out.');
     }
-    if (error.message.includes('fetch failed')) {
+     if (error.message.includes('fetch failed')) {
         throw new Error('A network error occurred. This may be due to restrictions in the development environment that block outbound API calls. Consider using a proxy or serverless function to access the external API.');
     }
     throw error;
