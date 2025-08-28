@@ -12,6 +12,7 @@ import {
   LifeBuoy,
   TrendingUp,
   Thermometer,
+  LayoutDashboard,
 } from "lucide-react"
 
 import './globals.css';
@@ -34,6 +35,7 @@ import { UserNav } from '@/components/user-nav';
 import { Separator } from '@/components/ui/separator';
 import { LanguageProvider } from '@/hooks/use-language';
 import { useTranslation } from '@/hooks/use-translation';
+import { usePathname } from 'next/navigation';
 
 
 const texts = {
@@ -50,6 +52,16 @@ const texts = {
 
 function AppLayout({ children }: { children: React.ReactNode }) {
   const { t } = useTranslation(texts);
+  const pathname = usePathname();
+
+  if (pathname === '/welcome' || pathname === '/') {
+    return (
+       <div className="animate-fade-in">
+        {children}
+      </div>
+    )
+  }
+
   return (
     <SidebarProvider>
       <Sidebar>
@@ -72,9 +84,9 @@ function AppLayout({ children }: { children: React.ReactNode }) {
         <SidebarContent>
           <SidebarMenu>
             <SidebarMenuItem>
-              <Link href="/" passHref>
+              <Link href="/dashboard" passHref>
                 <SidebarMenuButton tooltip={t('dashboard')}>
-                  <Sprout />
+                  <LayoutDashboard />
                   <span>{t('dashboard')}</span>
                 </SidebarMenuButton>
               </Link>
@@ -154,7 +166,7 @@ function AppLayout({ children }: { children: React.ReactNode }) {
           <SidebarTrigger />
           <UserNav />
         </header>
-        <main className="flex-1 overflow-auto p-4 md:p-6">
+        <main className="flex-1 overflow-auto p-4 md:p-6 animate-fade-in-up">
           {children}
         </main>
       </SidebarInset>
