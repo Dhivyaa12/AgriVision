@@ -28,12 +28,12 @@ const formSchema = z.object({
 });
 
 const languages = [
-  { value: 'en', label: 'English' },
-  { value: 'ta', label: 'Tamil' },
-  { value: 'hi', label: 'Hindi' },
-  { value: 'ml', label: 'Malayalam' },
-  { value: 'te', label: 'Telugu' },
-  { value: 'kn', label: 'Kannada' },
+  { value: 'en', label: 'English', code: 'en-US' },
+  { value: 'ta', label: 'Tamil', code: 'ta-IN' },
+  { value: 'hi', label: 'Hindi', code: 'hi-IN' },
+  { value: 'ml', label: 'Malayalam', code: 'ml-IN' },
+  { value: 'te', label: 'Telugu', code: 'te-IN' },
+  { value: 'kn', label: 'Kannada', code: 'kn-IN' },
 ];
 
 const texts = {
@@ -239,7 +239,8 @@ export function CropDiagnosisForm() {
         reader.onloadend = async () => {
           const audioDataUri = reader.result as string;
           try {
-            const { text } = await speechToText({ audioDataUri });
+            const currentLangCode = languages.find(l => l.value === language)?.code || 'en-US';
+            const { text } = await speechToText({ audioDataUri, language: currentLangCode });
             form.setValue('description', text);
           } catch (e) {
             console.error(e);
