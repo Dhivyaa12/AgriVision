@@ -47,9 +47,9 @@ export default function WelcomePage() {
         playsInline
         className="absolute top-0 left-0 min-h-full min-w-full object-cover z-0"
         poster="https://placehold.co/1920x1080/1c2a1e/639c6e?text=Loading+Video..."
-        data-ai-hint="agriculture technology video"
+        data-ai-hint="dawn landscape nature"
       >
-        <source src="https://cdn.pixabay.com/video/2024/05/23/212351-945763574_large.mp4" type="video/mp4" />
+        <source src="https://cdn.pixabay.com/video/2020/05/19/35479-421764519_large.mp4" type="video/mp4" />
         Your browser does not support the video tag.
       </video>
       <div className="absolute top-0 left-0 w-full h-full bg-black/50 z-10"></div>
