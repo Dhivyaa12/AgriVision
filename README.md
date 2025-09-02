@@ -2,11 +2,16 @@
 
 AgriVision is a comprehensive web application designed to empower farmers by providing AI-driven insights and real-time data. From diagnosing crop diseases to recommending government schemes, AgriVision serves as a one-stop solution for modern agricultural needs. The platform is built with a multilingual interface to ensure accessibility for a diverse user base across India.
 
+<!-- Add a screenshot of the dashboard here -->
+![AgriVision Dashboard](https://placehold.co/800x450/1c2a1e/639c6e?text=AgriVision+Dashboard)
+
 ## Core Features
 
 - **Crop Diagnosis**: Analyzes uploaded crop images and descriptions to identify diseases, suggest remedies, and provide preventive advice.
 - **Crop Recommendation**: Recommends optimal crops based on soil type, weather conditions, and geographical location.
 - **Market Watch**: Displays real-time Mandi (market) prices for various agricultural commodities, helping farmers make informed selling decisions.
+- **Market Analyser**: Predicts future commodity prices using historical data and AI-powered trend analysis.
+- **Sensor Analysis**: Integrates and analyzes farm sensor data to provide a holistic view of soil health and environmental conditions, coupled with crop and scheme recommendations.
 - **Government Scheme Recommender**: Suggests relevant central and state government schemes tailored to the user's specific needs and location.
 - **Multilingual Support**: Offers full-app translation and text-to-speech capabilities in English, Hindi, Tamil, Telugu, Kannada, and Malayalam.
 - **Modern User Interface**: A responsive and accessible UI with light/dark theme support.
@@ -23,6 +28,57 @@ AgriVision is built on a modern, robust, and scalable technology stack:
 - **Generative AI**: **Google Gemini API** (including `gemini-2.0-flash` for analysis/translation and `gemini-2.5-flash-preview-tts` for text-to-speech).
 - **Forms**: **React Hook Form** with **Zod** for robust form validation.
 - **State Management**: **React Context API** and custom hooks (`useLanguage`, `useTranslation`) for managing global state like language and theme.
+
+## Local Development Setup
+
+To get AgriVision running on your local machine, follow these steps.
+
+### 1. Prerequisites
+
+- Node.js (v18 or later)
+- npm or yarn
+
+### 2. Clone the Repository
+
+```bash
+git clone https://github.com/Dhivyaa12/AgriVision.git
+cd AgriVision
+```
+
+### 3. Install Dependencies
+
+```bash
+npm install
+```
+
+### 4. Set Up Environment Variables
+
+Create a `.env` file in the root directory of your project and add your Google Gemini API key:
+
+```env
+GEMINI_API_KEY=your_api_key_here
+```
+
+### 5. Run the Development Servers
+
+For local development, the application requires two separate processes to run concurrently: the Next.js frontend and the Genkit AI server.
+
+- **Terminal 1: Run the Next.js App**
+  This command starts the frontend development server.
+
+  ```bash
+  npm run dev
+  ```
+  The app will be available at `http://localhost:9002`.
+
+- **Terminal 2: Run the Genkit Server**
+  This command starts the Genkit server, which powers all the AI features.
+
+  ```bash
+  npm run genkit:dev
+  ```
+
+Once both servers are running, you can access the application in your browser.
 
 ## Project Structure
 
@@ -42,12 +98,15 @@ src
 │   ├── forms           # Form components for each feature
 │   └── ui              # ShadCN UI components
 ├── hooks               # Custom React hooks (e.g., useTranslation, useLanguage)
-└── lib                 # Utility functions
+└── lib                 # Utility functions and static data
 ```
 
-## Workflow Example: Crop Diagnosis
+<!-- Add a screenshot of the Crop Diagnosis feature here -->
+![Crop Diagnosis](https://placehold.co/800x450/1c2a1e/639c6e?text=Crop+Diagnosis+Feature)
 
-Here’s a step-by-step breakdown of how a feature works, using Crop Diagnosis as an example:
+## How It Works: An Example Workflow
+
+Here’s a step-by-step breakdown of how a feature works, using **Crop Diagnosis** as an example:
 
 1.  **User Interaction (Frontend)**:
     - A user navigates to the `/crop-diagnosis` page.
@@ -55,7 +114,7 @@ Here’s a step-by-step breakdown of how a feature works, using Crop Diagnosis a
     - The user uploads an image and provides a text description (or uses the microphone for speech-to-text).
 
 2.  **API Request**:
-    - Upon form submission, the frontend calls the `diagnoseCrop` function, which is a server-side function exported from the AI flow.
+    - Upon form submission, the frontend calls the `diagnoseCrop` server function.
     - The image is converted to a Base64 data URI and sent along with the description to the backend.
 
 3.  **AI Processing (Backend)**:
@@ -72,40 +131,4 @@ Here’s a step-by-step breakdown of how a feature works, using Crop Diagnosis a
     - The text is first translated via the `translateText` flow if the language is not English.
     - The (translated) text is sent to the **Gemini TTS model**, which generates the audio.
     - The audio is returned to the frontend as a data URI and played automatically.
-
-## Getting Started
-
-To run this project locally, follow these steps:
-
-1.  **Clone the repository**:
-    ```bash
-    git clone <repository-url>
-    ```
-
-2.  **Install dependencies**:
-    ```bash
-    npm install
-    ```
-
-3.  **Set up environment variables**:
-    - Create a `.env` file in the root directory.
-    - Add your Gemini API key:
-      ```
-      GEMINI_API_KEY=your_api_key_here
-      ```
-
-4.  **Run the development server**:
-    The application runs on two parallel processes: the Next.js frontend and the Genkit AI server.
-    
-    - **Run the Next.js app**:
-      ```bash
-      npm run dev
-      ```
-    - **Run the Genkit server**:
-      ```bash
-      npm run genkit:dev
-      ```
-
-5.  **Open the application**:
-    Navigate to `http://localhost:9002` in your browser.
 ```
