@@ -82,6 +82,7 @@ function AppLayout({ children }: { children: React.ReactNode }) {
       <Sidebar>
         <SidebarHeader>
           <div className="flex items-center gap-2">
+            <Leaf className="h-8 w-8 text-primary" />
             <div className="flex flex-col">
               <h1 className="text-2xl font-headline font-bold text-primary">AgriVision</h1>
               <p className="text-xs text-muted-foreground">Smarter Farming</p>
