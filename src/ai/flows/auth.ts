@@ -49,12 +49,20 @@ export type SignupOutput = z.infer<typeof SignupOutputSchema>;
 // Helper function to read users from the mock database
 async function readUsers(): Promise<User[]> {
   try {
+    await fs.access(USERS_FILE_PATH);
     const data = await fs.readFile(USERS_FILE_PATH, 'utf-8');
+    // Handle case where file is empty
+    if (!data) return [];
     return JSON.parse(data);
   } catch (error) {
-    // If the file doesn't exist, return an empty array
+    // If the file doesn't exist, create it with an empty array
     if ((error as NodeJS.ErrnoException).code === 'ENOENT') {
+      await writeUsers([]);
       return [];
+    }
+    // Handle JSON parsing error for an empty file
+    if (error instanceof SyntaxError) {
+        return [];
     }
     throw error;
   }
@@ -62,6 +70,8 @@ async function readUsers(): Promise<User[]> {
 
 // Helper function to write users to the mock database
 async function writeUsers(users: User[]): Promise<void> {
+  // Ensure the directory exists
+  await fs.mkdir(path.dirname(USERS_FILE_PATH), { recursive: true });
   await fs.writeFile(USERS_FILE_PATH, JSON.stringify(users, null, 2), 'utf-8');
 }
 
