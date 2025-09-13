@@ -1,17 +1,19 @@
 
 'use client';
-
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useRouter } from 'next/navigation';
 import { useTranslation } from '@/hooks/use-translation';
+import { useUser } from '@/hooks/use-user';
 
 const texts = {
     title: "Login to AgriVision",
     description: "Enter your credentials to access your dashboard.",
     username: "Username",
+    email: "Email",
     password: "Password",
     loginButton: "Login"
 }
@@ -19,8 +21,13 @@ const texts = {
 export default function LoginPage() {
     const router = useRouter();
     const { t } = useTranslation(texts);
+    const { setUser } = useUser();
+    const [username, setUsername] = useState('farmer');
+    const [email, setEmail] = useState('farmer@example.com');
+
 
     const handleLogin = () => {
+        setUser({ name: username, email: email, state: 'Maharashtra' });
         router.push('/dashboard');
     };
 
@@ -37,7 +44,25 @@ export default function LoginPage() {
                 <CardContent className="grid gap-4">
                     <div className="grid gap-2">
                         <Label htmlFor="username">{t('username')}</Label>
-                        <Input id="username" type="text" placeholder="farmer" required />
+                        <Input 
+                            id="username" 
+                            type="text" 
+                            placeholder="farmer" 
+                            required 
+                            value={username}
+                            onChange={(e) => setUsername(e.target.value)}
+                        />
+                    </div>
+                     <div className="grid gap-2">
+                        <Label htmlFor="email">{t('email')}</Label>
+                        <Input 
+                            id="email" 
+                            type="email" 
+                            placeholder="farmer@example.com" 
+                            required 
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                        />
                     </div>
                     <div className="grid gap-2">
                         <Label htmlFor="password">{t('password')}</Label>
@@ -53,4 +78,3 @@ export default function LoginPage() {
         </div>
     );
 }
-

@@ -36,6 +36,7 @@ import { Separator } from '@/components/ui/separator';
 import { LanguageProvider } from '@/hooks/use-language';
 import { useTranslation } from '@/hooks/use-translation';
 import { usePathname } from 'next/navigation';
+import { UserProvider } from '@/hooks/use-user';
 
 
 const texts = {
@@ -199,9 +200,11 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <LanguageProvider>
-            <AppLayout>
-              {children}
-            </AppLayout>
+            <UserProvider>
+              <AppLayout>
+                {children}
+              </AppLayout>
+            </UserProvider>
           </LanguageProvider>
           <Toaster />
         </ThemeProvider>

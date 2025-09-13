@@ -7,6 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { useTranslation } from '@/hooks/use-translation';
+import { useUser } from '@/hooks/use-user';
 
 
 const texts = {
@@ -21,6 +22,8 @@ const texts = {
 
 export default function ProfilePage() {
     const { t } = useTranslation(texts);
+    const { user } = useUser();
+
   return (
     <div className="container mx-auto py-8 px-4 md:px-6">
       <PageHeader>
@@ -35,26 +38,26 @@ export default function ProfilePage() {
                 <div className="flex items-center gap-4">
                     <Avatar className="h-20 w-20">
                         <AvatarImage src="https://placehold.co/100x100.png" alt="@user" data-ai-hint="user avatar" />
-                        <AvatarFallback>U</AvatarFallback>
+                        <AvatarFallback>{user.name.charAt(0).toUpperCase()}</AvatarFallback>
                     </Avatar>
                     <div>
-                        <CardTitle className="text-2xl">Farmer</CardTitle>
-                        <CardDescription>farmer@example.com</CardDescription>
+                        <CardTitle className="text-2xl">{user.name}</CardTitle>
+                        <CardDescription>{user.email}</CardDescription>
                     </div>
                 </div>
             </CardHeader>
           <CardContent className="space-y-6">
             <div className="space-y-2">
               <Label htmlFor="username">{t('username')}</Label>
-              <Input id="username" value="farmer" readOnly />
+              <Input id="username" value={user.name} readOnly />
             </div>
             <div className="space-y-2">
               <Label htmlFor="email">{t('email')}</Label>
-              <Input id="email" type="email" value="farmer@example.com" readOnly />
+              <Input id="email" type="email" value={user.email} readOnly />
             </div>
             <div className="space-y-2">
               <Label htmlFor="state">{t('state')}</Label>
-              <Input id="state" value="Maharashtra" readOnly />
+              <Input id="state" value={user.state} readOnly />
             </div>
             <Button>{t('editProfile')}</Button>
           </CardContent>
