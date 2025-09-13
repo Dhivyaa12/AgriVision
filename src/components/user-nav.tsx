@@ -32,9 +32,13 @@ export function UserNav() {
   const router = useRouter();
 
   const handleLogout = () => {
-    setUser(defaultUser); // Reset user to default
+    setUser(null); // Reset user to null
     router.push('/login');
   };
+
+  if (!user) {
+    return null; // Don't render anything if there's no user
+  }
 
   return (
     <DropdownMenu>
@@ -42,16 +46,16 @@ export function UserNav() {
         <Button variant="ghost" className="relative h-8 w-8 rounded-full">
           <Avatar className="h-9 w-9">
             <AvatarImage src="https://placehold.co/100x100.png" alt="@shadcn" data-ai-hint="user avatar" />
-            <AvatarFallback>{user?.name.charAt(0).toUpperCase()}</AvatarFallback>
+            <AvatarFallback>{user.name?.charAt(0).toUpperCase()}</AvatarFallback>
           </Avatar>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-56" align="end" forceMount>
         <DropdownMenuLabel className="font-normal">
           <div className="flex flex-col space-y-1">
-            <p className="text-sm font-medium leading-none">{user?.name}</p>
+            <p className="text-sm font-medium leading-none">{user.name}</p>
             <p className="text-xs leading-none text-muted-foreground">
-              {user?.email}
+              {user.email}
             </p>
           </div>
         </DropdownMenuLabel>

@@ -12,16 +12,10 @@ type User = {
 type UserContextType = {
   user: User | null;
   setUser: (user: User | null) => void;
-  defaultUser: User;
 };
 
 const UserContext = createContext<UserContextType | undefined>(undefined);
 
-const defaultUser: User = {
-  name: 'Guest',
-  email: 'guest@example.com',
-  state: 'Unknown',
-};
 
 export function UserProvider({ children }: { children: ReactNode }) {
   const [user, setUserState] = useState<User | null>(() => {
@@ -51,7 +45,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
   }, []);
 
   return (
-    <UserContext.Provider value={{ user, setUser, defaultUser }}>
+    <UserContext.Provider value={{ user, setUser }}>
       {children}
     </UserContext.Provider>
   );
