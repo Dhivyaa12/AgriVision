@@ -120,13 +120,24 @@ export const signupUser = ai.defineFlow(
   async (newUser) => {
     const users = await readUsers();
     
-    // Check if user already exists
     const existingUser = users.find((u) => u.email === newUser.email);
+    
     if (existingUser) {
-      return {
-        success: false,
-        message: 'A user with this email already exists.',
-      };
+      // If user exists, check if password matches (treat as a login attempt)
+      if (existingUser.password === newUser.password) {
+        const { password: _, ...userWithoutPassword } = existingUser;
+        return {
+          success: true,
+          user: userWithoutPassword,
+          message: 'Login successful.',
+        };
+      } else {
+        // Password does not match, so it's a failed signup attempt for an existing email
+        return {
+          success: false,
+          message: 'A user with this email already exists. Please sign in or use a different email.',
+        };
+      }
     }
 
     // Add new user
