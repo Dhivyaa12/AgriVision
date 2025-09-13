@@ -1,13 +1,15 @@
 
 "use client";
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { getAllMarketData } from '@/ai/flows/market-data';
 import { Loader2, ArrowLeft, ArrowRight } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from './ui/alert';
 import { useTranslation } from '@/hooks/use-translation';
 import { Button } from './ui/button';
+import { useLanguage } from '@/hooks/use-language';
+import { translateText } from '@/ai/flows/translate-text';
 
 type MarketData = {
   state: string | null;
@@ -49,10 +51,14 @@ const texts = {
 const MarketWatchTable: React.FC<MarketWatchTableProps> = ({ selectedState }) => {
   const [allMarketData, setAllMarketData] = useState<MarketData[]>([]);
   const [loading, setLoading] = useState(true);
+  const [translationLoading, setTranslationLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
+  const [translatedData, setTranslatedData] = useState<MarketData[]>([]);
+
   const rowsPerPage = 10;
   const { t } = useTranslation(texts);
+  const { language } = useLanguage();
 
 
   useEffect(() => {
@@ -81,7 +87,6 @@ const MarketWatchTable: React.FC<MarketWatchTableProps> = ({ selectedState }) =>
   }, [allMarketData, selectedState]);
   
   useEffect(() => {
-      // Reset to first page whenever filter changes
       setCurrentPage(1);
   }, [selectedState]);
 
@@ -89,7 +94,68 @@ const MarketWatchTable: React.FC<MarketWatchTableProps> = ({ selectedState }) =>
   const totalPages = Math.ceil(filteredData.length / rowsPerPage);
   const startIndex = (currentPage - 1) * rowsPerPage;
   const endIndex = startIndex + rowsPerPage;
-  const currentData = filteredData.slice(startIndex, endIndex);
+  const currentData = useMemo(() => filteredData.slice(startIndex, endIndex), [filteredData, startIndex, endIndex]);
+
+  const translateCurrentPageData = useCallback(async (dataToTranslate: MarketData[], targetLanguage: string) => {
+    if (targetLanguage === 'en') {
+      setTranslatedData(dataToTranslate);
+      return;
+    }
+
+    setTranslationLoading(true);
+
+    const uniqueValues = new Set<string>();
+    dataToTranslate.forEach(row => {
+        if (row.commodity) uniqueValues.add(row.commodity);
+        if (row.state) uniqueValues.add(row.state);
+        if (row.district) uniqueValues.add(row.district);
+        if (row.market) uniqueValues.add(row.market);
+        if (row.variety) uniqueValues.add(row.variety);
+    });
+
+    const valuesToTranslate = Array.from(uniqueValues);
+    if(valuesToTranslate.length === 0) {
+        setTranslatedData(dataToTranslate);
+        setTranslationLoading(false);
+        return;
+    }
+
+    try {
+        const combinedText = valuesToTranslate.join('\n---\n');
+        const translationResponse = await translateText({ text: combinedText, targetLanguage });
+        const translatedParts = translationResponse.translatedText.split('\n---\n');
+
+        const translationMap = new Map<string, string>();
+        valuesToTranslate.forEach((original, index) => {
+            translationMap.set(original, translatedParts[index] || original);
+        });
+
+        const newTranslatedData = dataToTranslate.map(row => ({
+            ...row,
+            commodity: row.commodity ? translationMap.get(row.commodity) || row.commodity : null,
+            state: row.state ? translationMap.get(row.state) || row.state : null,
+            district: row.district ? translationMap.get(row.district) || row.district : null,
+            market: row.market ? translationMap.get(row.market) || row.market : null,
+            variety: row.variety ? translationMap.get(row.variety) || row.variety : null,
+        }));
+        setTranslatedData(newTranslatedData);
+
+    } catch (e) {
+        console.error("Translation failed", e);
+        setTranslatedData(dataToTranslate); // fallback to original
+    } finally {
+        setTranslationLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (currentData.length > 0) {
+        translateCurrentPageData(currentData, language);
+    } else {
+        setTranslatedData([]);
+    }
+  }, [currentData, language, translateCurrentPageData]);
+
 
   const handlePreviousPage = () => {
     setCurrentPage((prev) => Math.max(prev - 1, 1));
@@ -123,7 +189,7 @@ const MarketWatchTable: React.FC<MarketWatchTableProps> = ({ selectedState }) =>
     return <p>{t('noData')}</p>;
   }
 
-  if (currentData.length === 0) {
+  if (filteredData.length === 0) {
       return (
           <div className="text-center text-muted-foreground py-10">
               {t('noDataForState')}
@@ -133,7 +199,12 @@ const MarketWatchTable: React.FC<MarketWatchTableProps> = ({ selectedState }) =>
 
   return (
     <>
-      <div className="rounded-md border">
+      <div className="rounded-md border relative">
+        {translationLoading && (
+            <div className="absolute inset-0 bg-background/50 flex items-center justify-center z-10">
+                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            </div>
+        )}
         <Table>
           <TableCaption>{t('caption')}</TableCaption>
           <TableHeader>
@@ -150,7 +221,7 @@ const MarketWatchTable: React.FC<MarketWatchTableProps> = ({ selectedState }) =>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {currentData.map((data, index) => (
+            {translatedData.map((data, index) => (
               <TableRow key={`${data.state}-${data.market}-${data.commodity}-${index}`}>
                 <TableCell className="font-medium">{data.commodity || '-'}</TableCell>
                 <TableCell>{data.state || '-'}</TableCell>
@@ -176,7 +247,7 @@ const MarketWatchTable: React.FC<MarketWatchTableProps> = ({ selectedState }) =>
                 variant="outline"
                 size="sm"
                 onClick={handlePreviousPage}
-                disabled={currentPage === 1}
+                disabled={currentPage === 1 || translationLoading}
             >
                 <ArrowLeft className="mr-2 h-4 w-4" />
                 {t('previous')}
@@ -185,7 +256,7 @@ const MarketWatchTable: React.FC<MarketWatchTableProps> = ({ selectedState }) =>
                 variant="outline"
                 size="sm"
                 onClick={handleNextPage}
-                disabled={currentPage === totalPages}
+                disabled={currentPage === totalPages || translationLoading}
             >
                 {t('next')}
                 <ArrowRight className="ml-2 h-4 w-4" />
