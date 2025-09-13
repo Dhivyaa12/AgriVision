@@ -3,7 +3,6 @@
 AgriVision is a comprehensive web application designed to empower farmers by providing AI-driven insights and real-time data. From diagnosing crop diseases to recommending government schemes, AgriVision serves as a one-stop solution for modern agricultural needs. The platform is built with a multilingual interface to ensure accessibility for a diverse user base across India.
 
 <!-- Add a screenshot of the dashboard here -->
-![AgriVision Dashboard](<source src="/videos/Agrivision.mp4" type="video/mp4" />)
 
 ## Core Features
 
