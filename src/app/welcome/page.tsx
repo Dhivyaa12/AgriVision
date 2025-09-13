@@ -49,7 +49,7 @@ export default function WelcomePage() {
         className="absolute top-0 left-0 min-h-full min-w-full object-cover z-0"
         data-ai-hint="dawn landscape nature"
       >
-        <source src="https://cdn.pixabay.com/video/2024/05/23/211757-946059918_large.mp4" type="video/mp4" />
+        <source src="/videos/Agrivision.mp4" type="video/mp4" />
         Your browser does not support the video tag.
       </video>
       <div className="absolute top-0 left-0 w-full h-full bg-black/50 z-10"></div>
