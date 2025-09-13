@@ -46,7 +46,6 @@ export default function WelcomePage() {
         muted
         playsInline
         className="absolute top-0 left-0 min-h-full min-w-full object-cover z-0"
-        poster="https://placehold.co/1920x1080/1c2a1e/639c6e?text=Loading+Video..."
         data-ai-hint="dawn landscape nature"
       >
         <source src="https://cdn.pixabay.com/video/2020/05/19/35479-421764519_large.mp4" type="video/mp4" />
