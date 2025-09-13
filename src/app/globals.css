@@ -84,7 +84,6 @@ body {
   }
   body {
     @apply bg-background text-foreground;
-    background-image: url('https://placehold.co/1920x1080.png');
     background-size: cover;
     background-position: center;
     background-attachment: fixed;
