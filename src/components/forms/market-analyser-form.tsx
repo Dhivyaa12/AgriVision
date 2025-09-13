@@ -301,9 +301,11 @@ export function MarketAnalyserForm() {
                   <div className="p-3 bg-accent/10 rounded-full mt-1">
                     <Lightbulb className="h-6 w-6 text-accent" />
                   </div>
-                  <div>
+                  <div className="flex-1">
                     <h3 className="font-semibold">{t('suggestion')}</h3>
-                    <p className="text-sm font-bold text-accent-foreground">{translatedResult.suggestion}</p>
+                    <div className="mt-2 bg-accent/10 border-l-4 border-accent p-4 rounded-r-lg">
+                      <p className="font-semibold text-accent-foreground">{translatedResult.suggestion}</p>
+                    </div>
                   </div>
                 </div>
             </div>
