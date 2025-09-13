@@ -27,7 +27,7 @@ export default function WelcomePage() {
   const handleStart = () => {
     setIsExiting(true);
     setTimeout(() => {
-      router.push('/dashboard');
+      router.push('/login');
     }, 500); // Match the duration of the fade-out animation
   };
 

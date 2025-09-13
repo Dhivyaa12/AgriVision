@@ -54,7 +54,8 @@ function AppLayout({ children }: { children: React.ReactNode }) {
   const { t } = useTranslation(texts);
   const pathname = usePathname();
 
-  if (pathname === '/welcome' || pathname === '/') {
+  const noSidebarRoutes = ['/welcome', '/', '/login'];
+  if (noSidebarRoutes.includes(pathname)) {
     return (
        <div className="animate-fade-in">
         {children}
