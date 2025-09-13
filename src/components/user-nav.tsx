@@ -14,9 +14,10 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { ThemeToggle } from "./theme-toggle"
-import { Settings, LogOut, User } from "lucide-react"
+import { Settings, LogOut, User as UserIcon } from "lucide-react"
 import { useTranslation } from "@/hooks/use-translation";
 import { useUser } from "@/hooks/use-user";
+import { useRouter } from "next/navigation";
 
 const texts = {
     profile: "Profile",
@@ -27,23 +28,30 @@ const texts = {
 
 export function UserNav() {
   const { t } = useTranslation(texts);
-  const { user } = useUser();
+  const { user, setUser, defaultUser } = useUser();
+  const router = useRouter();
+
+  const handleLogout = () => {
+    setUser(defaultUser); // Reset user to default
+    router.push('/login');
+  };
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" className="relative h-8 w-8 rounded-full">
           <Avatar className="h-9 w-9">
             <AvatarImage src="https://placehold.co/100x100.png" alt="@shadcn" data-ai-hint="user avatar" />
-            <AvatarFallback>{user.name.charAt(0).toUpperCase()}</AvatarFallback>
+            <AvatarFallback>{user?.name.charAt(0).toUpperCase()}</AvatarFallback>
           </Avatar>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-56" align="end" forceMount>
         <DropdownMenuLabel className="font-normal">
           <div className="flex flex-col space-y-1">
-            <p className="text-sm font-medium leading-none">{user.name}</p>
+            <p className="text-sm font-medium leading-none">{user?.name}</p>
             <p className="text-xs leading-none text-muted-foreground">
-              {user.email}
+              {user?.email}
             </p>
           </div>
         </DropdownMenuLabel>
@@ -51,7 +59,7 @@ export function UserNav() {
         <DropdownMenuGroup>
           <Link href="/profile" passHref>
             <DropdownMenuItem>
-              <User className="mr-2 h-4 w-4" />
+              <UserIcon className="mr-2 h-4 w-4" />
               <span>{t('profile')}</span>
             </DropdownMenuItem>
           </Link>
@@ -68,12 +76,10 @@ export function UserNav() {
           <ThemeToggle />
         </DropdownMenuItem>
         <DropdownMenuSeparator />
-        <Link href="/login" passHref>
-            <DropdownMenuItem>
-              <LogOut className="mr-2 h-4 w-4" />
-              <span>{t('logout')}</span>
-            </DropdownMenuItem>
-        </Link>
+        <DropdownMenuItem onClick={handleLogout}>
+            <LogOut className="mr-2 h-4 w-4" />
+            <span>{t('logout')}</span>
+        </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   )

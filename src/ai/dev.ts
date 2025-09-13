@@ -12,3 +12,4 @@ import '@/ai/flows/translate-text.ts';
 import '@/ai/flows/market-price-prediction.ts';
 import '@/ai/flows/sensor-analysis.ts';
 import '@/ai/flows/market-data.ts';
+import '@/ai/flows/auth.ts';

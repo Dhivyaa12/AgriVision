@@ -10,43 +10,48 @@ type User = {
 };
 
 type UserContextType = {
-  user: User;
-  setUser: (user: User) => void;
+  user: User | null;
+  setUser: (user: User | null) => void;
+  defaultUser: User;
 };
 
 const UserContext = createContext<UserContextType | undefined>(undefined);
 
 const defaultUser: User = {
-  name: 'Farmer',
-  email: 'farmer@example.com',
-  state: 'Maharashtra',
+  name: 'Guest',
+  email: 'guest@example.com',
+  state: 'Unknown',
 };
 
 export function UserProvider({ children }: { children: ReactNode }) {
-  const [user, setUserState] = useState<User>(() => {
+  const [user, setUserState] = useState<User | null>(() => {
     if (typeof window === 'undefined') {
-      return defaultUser;
+      return null;
     }
     try {
-      const item = window.localStorage.getItem('user');
-      return item ? JSON.parse(item) : defaultUser;
+      const item = window.sessionStorage.getItem('user');
+      return item ? JSON.parse(item) : null;
     } catch (error) {
       console.error(error);
-      return defaultUser;
+      return null;
     }
   });
 
-  const setUser = useCallback((newUser: User) => {
+  const setUser = useCallback((newUser: User | null) => {
     try {
       setUserState(newUser);
-      window.localStorage.setItem('user', JSON.stringify(newUser));
+      if (newUser) {
+        window.sessionStorage.setItem('user', JSON.stringify(newUser));
+      } else {
+        window.sessionStorage.removeItem('user');
+      }
     } catch (error) {
       console.error(error);
     }
   }, []);
 
   return (
-    <UserContext.Provider value={{ user, setUser }}>
+    <UserContext.Provider value={{ user, setUser, defaultUser }}>
       {children}
     </UserContext.Provider>
   );

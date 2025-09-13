@@ -56,7 +56,9 @@ function AppLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
 
   const noSidebarRoutes = ['/welcome', '/', '/login'];
-  if (noSidebarRoutes.includes(pathname)) {
+  const showSidebar = !noSidebarRoutes.includes(pathname);
+
+  if (!showSidebar) {
     return (
        <div className="animate-fade-in">
         {children}
