@@ -10,7 +10,7 @@ import { useTranslation } from '@/hooks/use-translation';
 import { useUser } from '@/hooks/use-user';
 import { Loader2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
 
 const texts = {
@@ -26,19 +26,37 @@ const texts = {
 
 export default function ProfilePage() {
     const { t } = useTranslation(texts);
-    const { user } = useUser();
+    const { user, defaultUser } = useUser();
     const router = useRouter();
+    const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
-        // If after checking, user is null, redirect to login
-        if (user === null) {
-           setTimeout(() => router.push('/login'), 2000);
-        }
+        // Give a moment for the user state to be loaded from sessionStorage
+        const timer = setTimeout(() => {
+            if (user === null) {
+                router.push('/login');
+            } else {
+                setIsLoading(false);
+            }
+        }, 500); // Adjust delay if needed
+
+        return () => clearTimeout(timer);
     }, [user, router]);
 
-    if (!user) {
+    const displayUser = user || defaultUser;
+
+    if (isLoading) {
         return (
             <div className="flex flex-col items-center justify-center h-full text-center">
+                <Loader2 className="h-8 w-8 animate-spin text-primary mb-4" />
+                <p className="text-muted-foreground">Loading profile...</p>
+            </div>
+        )
+    }
+    
+    if (!user) {
+        return (
+             <div className="flex flex-col items-center justify-center h-full text-center">
                 <Loader2 className="h-8 w-8 animate-spin text-primary mb-4" />
                 <p className="text-muted-foreground">{t('noUser')}</p>
             </div>
@@ -59,26 +77,26 @@ export default function ProfilePage() {
                 <div className="flex items-center gap-4">
                     <Avatar className="h-20 w-20">
                         <AvatarImage src="https://placehold.co/100x100.png" alt="@user" data-ai-hint="user avatar" />
-                        <AvatarFallback>{user.name?.charAt(0).toUpperCase()}</AvatarFallback>
+                        <AvatarFallback>{displayUser.name?.charAt(0).toUpperCase()}</AvatarFallback>
                     </Avatar>
                     <div>
-                        <CardTitle className="text-2xl">{user.name}</CardTitle>
-                        <CardDescription>{user.email}</CardDescription>
+                        <CardTitle className="text-2xl">{displayUser.name}</CardTitle>
+                        <CardDescription>{displayUser.email}</CardDescription>
                     </div>
                 </div>
             </CardHeader>
           <CardContent className="space-y-6">
             <div className="space-y-2">
               <Label htmlFor="username">{t('username')}</Label>
-              <Input id="username" value={user.name} readOnly />
+              <Input id="username" value={displayUser.name} readOnly />
             </div>
             <div className="space-y-2">
               <Label htmlFor="email">{t('email')}</Label>
-              <Input id="email" type="email" value={user.email} readOnly />
+              <Input id="email" type="email" value={displayUser.email} readOnly />
             </div>
             <div className="space-y-2">
               <Label htmlFor="state">{t('state')}</Label>
-              <Input id="state" value={user.state} readOnly />
+              <Input id="state" value={displayUser.state} readOnly />
             </div>
             <Button>{t('editProfile')}</Button>
           </CardContent>

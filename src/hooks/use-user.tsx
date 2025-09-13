@@ -12,24 +12,33 @@ type User = {
 type UserContextType = {
   user: User | null;
   setUser: (user: User | null) => void;
+  defaultUser: User;
 };
 
 const UserContext = createContext<UserContextType | undefined>(undefined);
 
+const defaultUser = {
+    name: 'Guest User',
+    email: 'guest@example.com',
+    state: 'Unknown',
+};
+
 
 export function UserProvider({ children }: { children: ReactNode }) {
-  const [user, setUserState] = useState<User | null>(() => {
-    if (typeof window === 'undefined') {
-      return null;
-    }
+  const [user, setUserState] = useState<User | null>(null);
+
+  useEffect(() => {
     try {
       const item = window.sessionStorage.getItem('user');
-      return item ? JSON.parse(item) : null;
+      if (item) {
+        setUserState(JSON.parse(item));
+      }
     } catch (error) {
-      console.error(error);
-      return null;
+      console.error("Failed to parse user from sessionStorage", error);
+      setUserState(null);
     }
-  });
+  }, []);
+
 
   const setUser = useCallback((newUser: User | null) => {
     try {
@@ -45,7 +54,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
   }, []);
 
   return (
-    <UserContext.Provider value={{ user, setUser }}>
+    <UserContext.Provider value={{ user, setUser, defaultUser }}>
       {children}
     </UserContext.Provider>
   );
