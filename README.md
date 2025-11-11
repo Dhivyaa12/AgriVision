@@ -104,7 +104,6 @@ src
 ```
 
 <!-- Add a screenshot of the Crop Diagnosis feature here -->
-![Crop Diagnosis](https://placehold.co/800x450/1c2a1e/639c6e?text=Crop+Diagnosis+Feature)
 
 ## How It Works: An Example Workflow
 
