@@ -5,6 +5,8 @@ AgriVision is a comprehensive web application designed to empower farmers by pro
 Youtube Link:- https://youtu.be/hkvd_iaR5CU
 
 Website Link:- http://agri-pi-gilt.vercel.app
+
+API MarketWatch data:- https://www.data.gov.in/resource/current-daily-price-various-commodities-various-markets-mandi
 <!-- Add a screenshot of the dashboard here -->
 
 ## Core Features
