@@ -1,15 +1,9 @@
-
 'use server';
 
-import {ai} from '@/ai/genkit';
-import {z} from 'genkit';
-import * as fs from 'fs/promises';
-import * as path from 'path';
+import { z } from 'genkit';
+import { ai } from '@/ai/genkit';
 
-// Define the path to the mock user data file
-const USERS_FILE_PATH = path.join(process.cwd(), 'src', 'lib', 'users.json');
-
-// Define the schema for a user
+// Define user schema
 const UserSchema = z.object({
   name: z.string(),
   email: z.string().email(),
@@ -18,69 +12,26 @@ const UserSchema = z.object({
 });
 export type User = z.infer<typeof UserSchema>;
 
-// Define the input schema for the login function
-const LoginInputSchema = z.object({
-  email: z.string().email(),
-  password: z.string(),
-});
-export type LoginInput = z.infer<typeof LoginInputSchema>;
-
-// Define the output schema for the login function
+// Define input/output schemas
+const LoginInputSchema = z.object({ email: z.string().email(), password: z.string() });
 const LoginOutputSchema = z.object({
   success: z.boolean(),
   user: UserSchema.omit({ password: true }).optional(),
   message: z.string(),
 });
-export type LoginOutput = z.infer<typeof LoginOutputSchema>;
 
-// Define the input schema for the signup function
 const SignupInputSchema = UserSchema;
-export type SignupInput = z.infer<typeof SignupInputSchema>;
-
-// Define the output schema for the signup function
 const SignupOutputSchema = z.object({
   success: z.boolean(),
   user: UserSchema.omit({ password: true }).optional(),
   message: z.string(),
 });
-export type SignupOutput = z.infer<typeof SignupOutputSchema>;
 
-
-// Helper function to read users from the mock database
-async function readUsers(): Promise<User[]> {
-  try {
-    await fs.access(USERS_FILE_PATH);
-    const data = await fs.readFile(USERS_FILE_PATH, 'utf-8');
-    // Handle case where file is empty
-    if (!data) return [];
-    return JSON.parse(data);
-  } catch (error) {
-    // If the file doesn't exist, create it with an empty array
-    if ((error as NodeJS.ErrnoException).code === 'ENOENT') {
-      await writeUsers([]);
-      return [];
-    }
-    // Handle JSON parsing error for an empty file
-    if (error instanceof SyntaxError) {
-        return [];
-    }
-    throw error;
-  }
-}
-
-// Helper function to write users to the mock database
-async function writeUsers(users: User[]): Promise<void> {
-  // Ensure the directory exists
-  await fs.mkdir(path.dirname(USERS_FILE_PATH), { recursive: true });
-  await fs.writeFile(USERS_FILE_PATH, JSON.stringify(users, null, 2), 'utf-8');
-}
-
+// --- In-memory user store (demo only) ---
+const users: User[] = [];
 
 // --- Genkit Flows ---
-
-/**
- * Logs in a user by checking their credentials against the mock database.
- */
+// Login flow: anyone can log in if they enter an email
 export const loginUser = ai.defineFlow(
   {
     name: 'loginUserFlow',
@@ -88,29 +39,13 @@ export const loginUser = ai.defineFlow(
     outputSchema: LoginOutputSchema,
   },
   async ({ email, password }) => {
-    const users = await readUsers();
-    const user = users.find((u) => u.email === email && u.password === password);
-
-    if (user) {
-      const { password: _, ...userWithoutPassword } = user;
-      return {
-        success: true,
-        user: userWithoutPassword,
-        message: 'Login successful.',
-      };
-    } else {
-      return {
-        success: false,
-        message: 'Invalid email or password.',
-      };
-    }
+    // Just return a user object without checking password
+    const user = { email, name: 'Demo User', state: 'Demo State' };
+    return { success: true, user, message: 'Login successful (no auth check).' };
   }
 );
 
-
-/**
- * Signs up a new user, checking if they already exist and adding them to the mock database.
- */
+// Signup flow: just return the user, no file write
 export const signupUser = ai.defineFlow(
   {
     name: 'signupUserFlow',
@@ -118,38 +53,9 @@ export const signupUser = ai.defineFlow(
     outputSchema: SignupOutputSchema,
   },
   async (newUser) => {
-    const users = await readUsers();
-    
-    const existingUser = users.find((u) => u.email === newUser.email);
-    
-    if (existingUser) {
-      // If user exists, check if password matches (treat as a login attempt)
-      if (existingUser.password === newUser.password) {
-        const { password: _, ...userWithoutPassword } = existingUser;
-        return {
-          success: true,
-          user: userWithoutPassword,
-          message: 'Login successful.',
-        };
-      } else {
-        // Password does not match, so it's a failed signup attempt for an existing email
-        return {
-          success: false,
-          message: 'A user with this email already exists. Please sign in or use a different email.',
-        };
-      }
-    }
-
-    // Add new user
+    // Add to in-memory array (optional)
     users.push(newUser);
-    await writeUsers(users);
-
-    const { password: _, ...userWithoutPassword } = newUser;
-
-    return {
-      success: true,
-      user: userWithoutPassword,
-      message: 'Signup successful!',
-    };
+    const { password, ...userWithoutPassword } = newUser;
+    return { success: true, user: userWithoutPassword, message: 'Signup successful (demo).' };
   }
 );
